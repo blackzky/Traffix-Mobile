@@ -1,5 +1,4 @@
-
-BASE_URL = "http://traffix.local:3000/";
+BASE_URL = "http://10.10.33.64:3000/";
 
 $(function() {
     $("nav#menu").mmenu({   position: "right",  zposition: "back"   });
