@@ -18,14 +18,23 @@ var MapHandler = {
 	endBounds: null,
 	MAP: null,
 	customEvents: null,
+	src: "",
+	EVENTS: {},
 
 	/* This function must be called only once.. */
 	setup: function(options, callback) {
+		MapHandler.src = "http://maps.googleapis.com/maps/api/js?key=" + MapHandler.API_KEY + "&sensor=false&callback=MapHandler._initMap"
 		if(options != null){
 			MapHandler.MIN_ZOOM = typeof(options.min_zoom) != "undefined"	? options.min_zoom : MapHandler.MIN_ZOOM;
 			MapHandler.INIT_ZOOM = typeof(options.init_zoom) != "undefined"	? options.init_zoom : MapHandler.INIT_ZOOM;
 		}
-		MapHandler._loadMapScript();
+		
+		if(document.querySelector("script[src='" + MapHandler.src + "'")){
+			MapHandler._spawnMap();
+			if(typeof(callback) != "undefined") callback(MapHandler.MAP);
+		}else{
+			MapHandler._loadMapScript();
+		}
 		if(typeof(callback) != "undefined") MapHandler.customEvents = callback;
 	},
 
@@ -33,12 +42,10 @@ var MapHandler = {
 	_loadMapScript: function() {
 		var script = document.createElement("script");
 		script.type = "text/javascript";
-		script.src = "http://maps.googleapis.com/maps/api/js?key=" + MapHandler.API_KEY + "&sensor=false&callback=MapHandler._initMap";
+		script.src = MapHandler.src;
 		document.body.appendChild(script);
 	},
-
-	/* This function is the actual initialization of the map, this adds the google map to the page */
-	_initMap: function(){
+	_spawnMap: function(){
 		MapHandler.startBounds =	new google.maps.LatLng(10.36, 123.8673); 
 		MapHandler.endBounds =	new google.maps.LatLng(10.2780, 123.940);
 
@@ -62,6 +69,12 @@ var MapHandler = {
 
 		google.maps.event.addListener(MapHandler.MAP, 'dragend', function(){ MapHandler._preventOutOfBounds(); });
 		google.maps.event.addListener(MapHandler.MAP, 'zoom_changed', function() { if (MapHandler.MAP.getZoom() < MapHandler.MIN_ZOOM) MapHandler.MAP.setZoom(MapHandler.MIN_ZOOM); });
+
+	},
+
+	/* This function is the actual initialization of the map, this adds the google map to the page */
+	_initMap: function(){
+		MapHandler._spawnMap();
 
 		if(typeof(MapHandler.customEvents) != "undefined") MapHandler.customEvents(MapHandler.MAP);
 	},
@@ -122,6 +135,11 @@ var MapHandler = {
 			});
 		}
 		MapHandler.MAP.controls[position].push(controlDiv);
+	},
+	clearControls: function(){
+        MapHandler.MAP.controls[google.maps.ControlPosition.BOTTOM_CENTER].clear();
+        MapHandler.MAP.controls[google.maps.ControlPosition.TOP_RIGHT].clear();
+        
 	},
 
 	/*

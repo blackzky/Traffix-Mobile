@@ -23,6 +23,8 @@ var Route = {
         
         if(suggest_mode){
             Route.MAP.setOptions({draggableCursor: "crosshair"});
+            Route.MARKERS = [];
+            google.maps.event.removeListener(Route.SUGGEST_ROUTE_LISTENER);
             Route.SUGGEST_ROUTE_LISTENER = google.maps.event.addListener(Route.MAP, "click", Route._suggestClickHandler);
         }
     },
@@ -43,6 +45,7 @@ var Route = {
             options = null,
             marker = null;
 
+        Route.MARKERS = [];
         for(i in nodes){
             pos = new google.maps.LatLng(nodes[i].lat, nodes[i].lng);
             options = { 

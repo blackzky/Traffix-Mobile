@@ -8,7 +8,7 @@ $(function(){
 		MapHandler.addUIControl("Back", 
 			google.maps.ControlPosition.TOP_LEFT, 
 			function(){
-				window.location = "/routes"; //TEMP solution  --back should load the routes page using ajax
+				viewPage("routes");
 			}
 		);
 

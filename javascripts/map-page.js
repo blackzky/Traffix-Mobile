@@ -122,8 +122,9 @@ function _gotoHandler(){
             console.log();
             if(response[0]){
                 var landmark = new google.maps.LatLng(response[0].x, response[0].y);
-                var ob = (landmark.ob.toFixed(3) == MapHandler.MAP.getCenter().ob.toFixed(3));
-                var pb = (landmark.pb.toFixed(3) == MapHandler.MAP.getCenter().pb.toFixed(3));
+                var keys = Object.keys(landmark);
+                var ob = (landmark[keys[0]].toFixed(3) == MapHandler.MAP.getCenter()[keys[0]].toFixed(3));
+                var pb = (landmark[keys[1]].toFixed(3) == MapHandler.MAP.getCenter()[keys[1]].toFixed(3));
                 if(ob && pb){
                     alert("You are already in that location");
                 }else{
@@ -166,6 +167,8 @@ function _suggestRouteHandler(){
         END = $("#destination").val();
         ROUTE_DURATION_DAYS = $("#route-durationDays").val() || 0;
         ROUTE_DURATION_HOURS = $("#route-durationHours").val() || 0;
+
+        MapHandler.clearControls();
 
         var suggest_guide = "<h3>Click on map to place markers, drag markers to change route</h3>";
         MapHandler.addUIControl(suggest_guide, google.maps.ControlPosition.BOTTOM_CENTER);
@@ -328,6 +331,7 @@ function _addReportHandler(){
     }else{
         $("#reportSituation").modal('hide');
         var location_guide = "<h3>Click on map to select location</h3>";
+        MapHandler.clearControls();
         MapHandler.addUIControl(location_guide, google.maps.ControlPosition.BOTTOM_CENTER);
         
         CREATE_REPORT_LISTENER = google.maps.event.addListener(MapHandler.MAP, "click", function(event) {

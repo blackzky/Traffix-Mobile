@@ -20,15 +20,14 @@ $(function() {
     $(window).resize(fitContent);
     fitContent();
     checkStats();
-
-
 });
 
 window.isMobile = function(){
     return (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase()));
 }
 
-function viewPage(page, dom){ 
+function viewPage(page, dom){
+    $("#loading").show();
     page = page || $(dom).data('page');
     if(page){
         page = page.toLowerCase();
@@ -49,6 +48,7 @@ function viewPage(page, dom){
             $('#page-container').html(response);
         }
     });
+
     return;
 }
 
