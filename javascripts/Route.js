@@ -49,7 +49,7 @@ var Route = {
                 map: Route.MAP,
                 position: pos,
                 draggable: false,
-                icon: '../img/plus.png'
+                icon: IMG_BASE + 'plus.png'
             };
             marker = new google.maps.Marker(options);
 
@@ -131,7 +131,7 @@ var Route = {
                 map: Route.MAP,
                 position: evtPos,
                 draggable: true,
-                icon: '../img/plus.png' //icon: 'http://www.google.com/mapfiles/marker'+ c +'.png'
+                icon: IMG_BASE + 'plus.png' //icon: 'http://www.google.com/mapfiles/marker'+ c +'.png'
             });
         marker.segmentIndex = Route.MARKERS.length - 1;
         marker.iconChar = c;//just storing this for good measure, may want at some time

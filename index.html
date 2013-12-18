@@ -28,13 +28,13 @@
           <ul class="nav navbar-nav navbar-left">
             <li><a href="#" data-page='map'><span class="menu-icon glyphicon glyphicon-globe"></span>Map View<span class="navbar-unread">.</span></a></li>
             <li><a href="#" data-page='routes'><span class="menu-icon glyphicon glyphicon-road"></span>Routes<span class="navbar-unread">.</span></a></li>
-            <li id="acctOptions"><a href="#" data-page='options' style="display: none;"><span class="menu-icon glyphicon glyphicon-cog"></span>Options<span class="navbar-unread" >.</span></a></li>
+            <li id="acctOptions1"></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
               <li><a href="#" data-page='help'><span class="menu-icon glyphicon glyphicon-question-sign"></span>Help</a></li>
           </ul>
           <div class="navbar-right nav-custom">
-            <a href="#" data-page='options' class="btn btn-primary nav-custom-text" id="acctStatus"><span class="menu-icon glyphicon glyphicon-user"></span>Login</a>
+            <a href="#" data-page='options' class="btn btn-primary nav-custom-text" id="acctStatus" onClick="logout()"><span class="menu-icon glyphicon glyphicon-user"></span>Login</a>
           </div>
         </div>
       </div>
@@ -49,11 +49,13 @@
           <li class="titled"><p class="sprite logo" style="margin: 0 auto;">...</p></li>
           <li><a href="/" data-page='map'><span class="menu-icon glyphicon glyphicon-globe"></span>Map View</a></li>
           <li><a href="/routes" data-page='routes'><span class="menu-icon glyphicon glyphicon-road"></span>Routes</a></li>
-          <li><a href="/options" data-page='options' id="acctOptions"><span class="menu-icon glyphicon glyphicon-cog"></span>Options</a></li>
+          <li id="acctOptions"></li>
           <li><a href="/help" data-page='help'><span class="menu-icon glyphicon glyphicon-question-sign"></span>Help</a></li>
-          <li><a href="/options" data-page='options'class="btn btn-primary nav-custom-text"><span class="menu-icon glyphicon glyphicon-user"></span>Login</a></li>
+          <li><a href="/options" data-page='options'class="btn btn-primary nav-custom-text" id="status_1" onclick="logout()"><span class="menu-icon glyphicon glyphicon-user"></span>Login</a></li>
         </ul>
       </nav>
     </div>  
+
+    <div id="script-container"></div>
 	</body>
 </html>

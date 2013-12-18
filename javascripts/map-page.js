@@ -1,36 +1,74 @@
 /* Globals */
-var MODES = {NORMAL: 1, SUGGEST: 2, REPORT: 3};
+var MODES = {NORMAL: 1, SUGGEST: 2, REPORT: 3, FILTER: 4};
 var MODE = MODES.NORMAL;
 
 INTENSITIES = {};
 REPORT_MARKERS = {};
 MAX_TI_VOTE = 3;
+MAX_CREATE_REPORT = 3;
+MAX_DOWNVOTE_REPORT = 1;
+REPORT_MARKERS_COUNT=0;
+ROAD = {};
 $(function(){
     CREATE_REPORT_LISTENER = null;
     MAXCHAR = 200;
-
+    var sample = {};
+    var x=0;
     MapHandler.setup({init_zoom: 15}, function(map){
         //for adding marker to DB
         /*MapHandler.MAP.setOptions({draggableCursor: "crosshair"});
         google.maps.event.addListener(map, "click", function(event) {
             var lat = event.latLng.lat();
             var lng = event.latLng.lng();
-            $.ajax({
-                url: '/saveNode',
-                type: 'POST',
-                data: {lat:lat, lng:lng},
-                success: function(response){
-                    alert("SAVE!");
-                },
-                error: function(){
-                    alert("ERROR");
-                }
-            });
-        });//end of click event */
-       
-        seedTI();
-        getReports();
+            var rj = {"lat": lat, "lng": lng};
+            sample["node" + x] = rj;
+            
+            x++;
+        });*/
 
+       /*MapHandler.addUIControl("SAVE", 
+            google.maps.ControlPosition.TOP_RIGHT, 
+            function(){
+               $.ajax({
+                    url: '/saveNode',
+                    type: 'POST',
+                    data: {co : JSON.stringify(sample)},
+                    success: function(response){
+                        alert("SAVE!");
+                        x = 0;
+                    }
+                });
+            }
+        );*/
+       var count = 0;
+        $.ajax({
+            url: BASE_URL + 'getRoadIntensity',
+            type: 'POST',
+            success: function(response){
+                var flightPlanCoordinates = [];
+                for(i in response){
+                    road = JSON.parse(response[i].road);
+                    flightPlanCoordinates = [];
+                    for(j in road){
+                        var s = new google.maps.LatLng(road[j].lat, road[j].lng);
+                        flightPlanCoordinates.push(s);
+                    }
+                    var flightPath = new google.maps.Polyline({
+                        path: flightPlanCoordinates,
+                        geodesic: true,
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2,
+                        id: response[i].id
+                    }); 
+                    ROAD[flightPath.id] = flightPath;
+                    flightPath.setMap(MapHandler.MAP);
+                }
+            }
+        });
+        
+        getReports();
+        seedTI();
         $.ajax({
             url: BASE_URL + 'getUpdate',
             type: 'POST',
@@ -42,6 +80,24 @@ $(function(){
                 }
             }
         });
+        $.ajax({
+            url: BASE_URL + 'updateRoad',
+            type: 'POST',
+            data: {},
+            success: function(response){
+                for(i in response){
+                  if(typeof(ROAD[ response[i].id ]) != "undefined"){
+                    if(response[i].status == "Light" && (response[i].lane == 1 || response[i].lane == 0)){
+                      ROAD[response[i].id].setOptions({strokeColor: 'green'});
+                    }else if(response[i].status == "Medium" && (response[i].lane == 1 || response[i].lane == 0)){
+                      ROAD[response[i].id].setOptions({strokeColor: 'yellow'});
+                    }else if(response[i].status == "Heavy" && (response[i].lane == 1 || response[i].lane == 0)){
+                      ROAD[response[i].id].setOptions({strokeColor: 'red'});
+                    }
+                  }
+                }
+            }
+        });
     });
 
     $("body").on("click", "#addReport", _addReportHandler);
@@ -49,7 +105,7 @@ $(function(){
     $(".mapnav").on("click", ".search", _gotoHandler);
     $(".mapnav").on("click", ".suggest", _suggestRoutePopop);
     $(".mapnav").on("click", ".report", _createReport);
-    $(".mapnav").on("click", ".filter", function(){console.log("filter")});
+    $(".mapnav").on("click", ".filter", function(){});
     $("#info").hide();
 });
 
@@ -134,10 +190,11 @@ function getReports(){
             map: MapHandler.MAP,
             title: $(this).data('type'),
             id: $(this).data('id'),
-            icon: '../img/' + reportIcon + '.png'
+            icon: IMG_BASE + reportIcon + '.png'
         });
 
         REPORT_MARKERS[$(this).data('id')] = marker;
+        REPORT_MARKERS_COUNT++;
 
         google.maps.event.addListener(marker, 'click', function(event) {
             var id = "#reports-" + this.id;
@@ -145,7 +202,7 @@ function getReports(){
             var date = new Date($(id).data('created'));
             var createDate = (date.getMonth()+ parseInt(1)) + '-' + date.getDate() + '-' + date.getFullYear();
             $('#downvoteReport').removeAttr("disabled");
-            $('#openReport').modal('show');
+            $('#openReport').modal({show:'true', backdrop: 'static', keyboard: true });
             $('#displayReportInfo').html('Report Type: ' + $(id).data('type') + '<br/>Details: ' + $(id).data('details') + '<br/>Created At: '+ createDate + '<br/>Status: ' + status);
             $('#downvotes').html($(id).data('downvotes'));
             $('#downvotesAmt').val($(id).data('downvotes'));
@@ -176,7 +233,7 @@ function seedTI(){
                         title: 'Traffic' + response[i].id,
                         visible: true,
                         id: response[i].id,
-                        icon: '../img/g1.png',
+                        icon: IMG_BASE + 'g1.png',
                         lane: response[i].lane_2
                     });
 
@@ -200,7 +257,6 @@ function seedTI(){
             }
             google.maps.event.addListener(MapHandler.MAP, 'zoom_changed', function() {
                 var zoomLevel = MapHandler.MAP.getZoom();
-                console.log('Zoom Level: ' + zoomLevel);
                 for(i in IN){
                     if(typeof(IN[i]) != "undefined" ){
                         IN[i].setVisible(zoomLevel > 14);
@@ -279,7 +335,7 @@ function _addReportHandler(){
             var lng = event.latLng.lng();
             MapHandler.MAP.controls[google.maps.ControlPosition.BOTTOM_CENTER].clear();
 
-            $('#confirmReport').modal('show');
+            $('#confirmReport').modal({show:'true', backdrop: 'static', keyboard: true });
             $('#lat').val(lat);
             $('#lng').val(lng);
             $('#days').val(expDay);
@@ -290,18 +346,26 @@ function _addReportHandler(){
 }
     
 function _createReport(){
-     if(MODE == MODES.NORMAL){
-        MODE = MODES.REPORT;
+    var create_report_cookie = get_cookie("Report-create");
 
-        $('#reportDetails').val("");
-        $('#durationDays').val("");
-        $('#durationHours').val("");
-        $('#txtCount').val(MAXCHAR);
-        $('#reportSituation').modal('show');
+    /* if refactored.. check condition if < or <=*/
+    if(create_report_cookie < MAX_CREATE_REPORT){
+
+         if(MODE == MODES.NORMAL){
+            MODE = MODES.REPORT;
+
+            $('#reportDetails').val("");
+            $('#durationDays').val("");
+            $('#durationHours').val("");
+            $('#txtCount').val(MAXCHAR);
+            $('#reportSituation').modal({show:'true', backdrop: 'static', keyboard: true });
+        }
+        else{
+            alert('report - invalid action');
+        }
     }
     else{
-        alert('report - invalid action');
-        return;
+        alert("Can't create anymore report.");
     }
 }
 
@@ -314,7 +378,7 @@ function _suggestRoutePopop(){
         $('#route-durationDays').val("");
         $('#route-durationHours').val("");
         $("#suggestRoute #errorMsg").hide();
-        $("#suggestRoute").modal("show");
+        $("#suggestRoute").modal({show:'true', backdrop: 'static', keyboard: true });
     }
     else{
         alert('suggest -invalid action');
