@@ -12,8 +12,8 @@
 
 var MapHandler = {
 	API_KEY: "AIzaSyCXzsYoJeFVeuF8vAbEqOVpw6kp1-1s9WM",
-	MIN_ZOOM: 13,
-	INIT_ZOOM: 13,
+	MIN_ZOOM: 14,
+	INIT_ZOOM: 14,
 	startBounds: null,
 	endBounds: null,
 	MAP: null,
@@ -23,13 +23,13 @@ var MapHandler = {
 
 	/* This function must be called only once.. */
 	setup: function(options, callback) {
-		MapHandler.src = "http://maps.googleapis.com/maps/api/js?key=" + MapHandler.API_KEY + "&sensor=false&callback=MapHandler._initMap"
+		MapHandler.src = "http://maps.googleapis.com/maps/api/js?key=" + MapHandler.API_KEY + "&sensor=false&callback=MapHandler._initMap";
 		if(options != null){
 			MapHandler.MIN_ZOOM = typeof(options.min_zoom) != "undefined"	? options.min_zoom : MapHandler.MIN_ZOOM;
 			MapHandler.INIT_ZOOM = typeof(options.init_zoom) != "undefined"	? options.init_zoom : MapHandler.INIT_ZOOM;
 		}
 		
-		if(document.querySelector("script[src='" + MapHandler.src + "'")){
+		if(document.querySelector("script[src='" + MapHandler.src + "']")){
 			MapHandler._spawnMap();
 			if(typeof(callback) != "undefined") callback(MapHandler.MAP);
 		}else{
@@ -46,11 +46,12 @@ var MapHandler = {
 		document.body.appendChild(script);
 	},
 	_spawnMap: function(){
-		MapHandler.startBounds =	new google.maps.LatLng(10.36, 123.8673); 
-		MapHandler.endBounds =	new google.maps.LatLng(10.2780, 123.940);
+		MapHandler.startBounds =	new google.maps.LatLng(10.360515,123.874441); 
+		MapHandler.endBounds =	new google.maps.LatLng(10.291105,123.92448);
 
 		var mapOptions = {
 			zoom: MapHandler.INIT_ZOOM,
+			maxZoom: 18,
 			// center: MapHandler._getMapCenter(),
 			center: new google.maps.LatLng(10.309884,123.89311),
 			keyboardShortcuts: false, 
@@ -69,7 +70,14 @@ var MapHandler = {
 
 		google.maps.event.addListener(MapHandler.MAP, 'dragend', function(){ MapHandler._preventOutOfBounds(); });
 		google.maps.event.addListener(MapHandler.MAP, 'zoom_changed', function() { if (MapHandler.MAP.getZoom() < MapHandler.MIN_ZOOM) MapHandler.MAP.setZoom(MapHandler.MIN_ZOOM); });
-
+		MapHandler.fixInfoWindow();
+	},
+	fixInfoWindow: function() {
+		var set = google.maps.InfoWindow.prototype.set;
+		google.maps.InfoWindow.prototype.set = function (key, val) {
+			if (key === 'map') {	if (!this.get('noSupress')) {return;}	}
+			set.apply(this, arguments);
+		}
 	},
 
 	/* This function is the actual initialization of the map, this adds the google map to the page */
@@ -169,4 +177,5 @@ var MapHandler = {
 
 		new google.maps.Marker({ position: MapHandler._getMapCenter(), map: MapHandler.MAP, title: 'Center' });
 	}
+
 };

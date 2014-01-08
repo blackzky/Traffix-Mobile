@@ -57,6 +57,11 @@ $(".lane-options").on("click", ".left, .right", function() {
   IS_LEFT = $(this).hasClass('left') ? 1 : 0;
   
 });
+$(".cancel-option").on("click", "#cancelSelect", function() {   
+  $(".two-lanes-btn").attr('disabled', 'disabled');
+  $("#OneWay").modal("hide");
+  $("#TwoWay").modal("hide");
+});
 
 $(".one-lane").on("click", ".light, .medium, .heavy", function() {
   create_cookie("TI-"+Traffic_intensity_id);
@@ -87,9 +92,11 @@ $(".two-lanes").on("click", ".light, .medium, .heavy", function() {
       _intensitySave('Heavy','Left');
     }
   }
-
+  $(".two-lanes-btn").attr('disabled', 'disabled');
+  $("#TwoWay").modal("hide");
  // $(".two-lanes-btn").attr("disabled","disabled");   
 });
+
 function _intensitySave(iv,lane){
   
   $.ajax({

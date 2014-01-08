@@ -2,7 +2,11 @@ BASE_URL = window.location.origin + "/";
 
 USE_LOCAL = true; /* Modify this before deployment. Value depends on device type. */
 IMG_BASE = USE_LOCAL ? "img/" : "../img/";
-LIVE_URL = "http://10.10.33.64:3000/"; /*Modify this later to the production url */
+
+
+LIVE_URL = "http://10.10.33.83:3000/"; /*Modify this later to the production url */
+
+
 IS_LOGGEDIN=false;
 
 $(function() {
@@ -54,10 +58,13 @@ function viewPage(page, dom){
 
 function changeStatus(){
     if(IS_LOGGEDIN){
-        $('#acctStatus').html('<span class="menu-icon glyphicon glyphicon-user"></span>Logout');
+        if($(window).width()<850)
+            $('#acctStatus').html('<span class="menu-icon glyphicon glyphicon-user"></span>');
+        else
+             $('#acctStatus').html('<span class="menu-icon glyphicon glyphicon-user"></span>Logout');
         $('#status_1').html('<span class="menu-icon glyphicon glyphicon-user"></span>Logout');
         $('#acctOptions').html('<a href="/options" data-page="options"><span class="menu-icon glyphicon glyphicon-cog"></span>Options</a>');
-        $('#acctOptions1').html('<a href="/options" data-page="options"><span class="menu-icon glyphicon glyphicon-cog"></span>Options<span class="navbar-unread" >.</span></a>');
+        $('#acctOptions1').html('<a href="/options" data-page="options"><span class="menu-icon glyphicon glyphicon-cog"></span>Options<span class="navbar-unread">.</span></a>');
      
     }else{
         $('#acctStatus').html('<span class="menu-icon glyphicon glyphicon-user"></span>Login');
@@ -88,17 +95,18 @@ function checkStats(){
 
 
 function logout(){
-if(IS_LOGGEDIN){
-    $.ajax({
-    url: BASE_URL + 'logout',
-    type: 'GET',
-    data: {},
-    success: function(response){
-        IS_LOGGEDIN=false;
-        changeStatus();
+    if(IS_LOGGEDIN){
+        $.ajax({
+        url: BASE_URL + 'logout',
+        type: 'GET',
+        data: {},
+        success: function(response){
+            IS_LOGGEDIN=false;
+            changeStatus();
+        }
+        });
     }
-    });
 }
-}
+
 
 function fitContent(){  var h = parseInt($("#traffix-nav").height());  $("#traffix-content").height(window.innerHeight - h - 1);   }

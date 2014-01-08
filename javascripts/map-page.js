@@ -2,102 +2,57 @@
 var MODES = {NORMAL: 1, SUGGEST: 2, REPORT: 3, FILTER: 4};
 var MODE = MODES.NORMAL;
 
-INTENSITIES = {};
+INTENSITIES_OFFICIAL = {};
+INTENSITIES_UNOFFICIAL = {};
 REPORT_MARKERS = {};
 MAX_TI_VOTE = 3;
 MAX_CREATE_REPORT = 3;
 MAX_DOWNVOTE_REPORT = 1;
 REPORT_MARKERS_COUNT=0;
-ROAD = {};
+ROAD_OFFICIAL = {};
+ROAD_UNOFFICIAL = {};
+MARKER_FILTER = "View All";
+INIT_MAP_ZOOM = 15;
+
 $(function(){
     CREATE_REPORT_LISTENER = null;
     MAXCHAR = 200;
     var sample = {};
     var x=0;
-    MapHandler.setup({init_zoom: 15}, function(map){
-        //for adding marker to DB
-        /*MapHandler.MAP.setOptions({draggableCursor: "crosshair"});
-        google.maps.event.addListener(map, "click", function(event) {
-            var lat = event.latLng.lat();
-            var lng = event.latLng.lng();
-            var rj = {"lat": lat, "lng": lng};
-            sample["node" + x] = rj;
-            
-            x++;
-        });*/
+    MapHandler.setup({init_zoom: INIT_MAP_ZOOM}, function(map){
+        seedTI('getNodeOfficial',INTENSITIES_OFFICIAL);
+        seedTI('getNodeUnofficial',INTENSITIES_UNOFFICIAL);
 
-       /*MapHandler.addUIControl("SAVE", 
-            google.maps.ControlPosition.TOP_RIGHT, 
-            function(){
-               $.ajax({
-                    url: '/saveNode',
-                    type: 'POST',
-                    data: {co : JSON.stringify(sample)},
-                    success: function(response){
-                        alert("SAVE!");
-                        x = 0;
-                    }
-                });
-            }
-        );*/
-       var count = 0;
-        $.ajax({
-            url: BASE_URL + 'getRoadIntensity',
-            type: 'POST',
-            success: function(response){
-                var flightPlanCoordinates = [];
-                for(i in response){
-                    road = JSON.parse(response[i].road);
-                    flightPlanCoordinates = [];
-                    for(j in road){
-                        var s = new google.maps.LatLng(road[j].lat, road[j].lng);
-                        flightPlanCoordinates.push(s);
-                    }
-                    var flightPath = new google.maps.Polyline({
-                        path: flightPlanCoordinates,
-                        geodesic: true,
-                        strokeColor: '#FF0000',
-                        strokeOpacity: 1.0,
-                        strokeWeight: 2,
-                        id: response[i].id
-                    }); 
-                    ROAD[flightPath.id] = flightPath;
-                    flightPath.setMap(MapHandler.MAP);
-                }
-            }
+        getRoadIntensity('getRoadIntensityUnofficial', ROAD_UNOFFICIAL);
+        getRoadIntensity('getRoadIntensityOfficial', ROAD_OFFICIAL, function(){
+            updateRoad('updateRoadOfficial', ROAD_OFFICIAL, function(){
+                updateRoad('updateRoadUnofficial', ROAD_UNOFFICIAL);
+            });
         });
+
+        /*
+        if(typeof(ROAD_UNOFFICIAL) != "undefined") updateRoad('updateRoadUnofficial', ROAD_UNOFFICIAL);
+        if(typeof(ROAD_OFFICIAL) != "undefined") updateRoad('updateRoadOfficial', ROAD_OFFICIAL);
+        updateRoad('updateRoadOfficial', ROAD_OFFICIAL);
+        updateRoad('updateRoadUnofficial', ROAD_UNOFFICIAL);
+        */
+ 
         
+        if(typeof(TOGGLE_MARKERS_VISIBILITY) != "undefined") google.maps.event.removeListener(TOGGLE_MARKERS_VISIBILITY);
+        TOGGLE_MARKERS_VISIBILITY = google.maps.event.addListener(MapHandler.MAP, 'zoom_changed', function() {
+                toggleMarkersByFilter();
+        });
+        /*if(MARKER_FILTER == "View All" || MARKER_FILTER == "OFFICIAL"){
+            MapHandler.addUIControl("OFFICIAL", 
+                google.maps.ControlPosition.TOP_RIGHT
+            );
+        }else if(MARKER_FILTER == "Traffic Intensity - UnOfficial"){
+            MapHandler.addUIControl("UNOFFCIAL", 
+                google.maps.ControlPosition.TOP_RIGHT
+            );
+        }*/
         getReports();
-        seedTI();
-        $.ajax({
-            url: BASE_URL + 'getUpdate',
-            type: 'POST',
-            data: {},
-            success: function(response){
-                for(i in response){
-                    if(typeof(INTENSITIES[ response[i].id ]) != "undefined")
-                    INTENSITIES[ response[i].id ].setIcon( getIcon(response[i].lane_1, response[i].lane_2) );
-                }
-            }
-        });
-        $.ajax({
-            url: BASE_URL + 'updateRoad',
-            type: 'POST',
-            data: {},
-            success: function(response){
-                for(i in response){
-                  if(typeof(ROAD[ response[i].id ]) != "undefined"){
-                    if(response[i].status == "Light" && (response[i].lane == 1 || response[i].lane == 0)){
-                      ROAD[response[i].id].setOptions({strokeColor: 'green'});
-                    }else if(response[i].status == "Medium" && (response[i].lane == 1 || response[i].lane == 0)){
-                      ROAD[response[i].id].setOptions({strokeColor: 'yellow'});
-                    }else if(response[i].status == "Heavy" && (response[i].lane == 1 || response[i].lane == 0)){
-                      ROAD[response[i].id].setOptions({strokeColor: 'red'});
-                    }
-                  }
-                }
-            }
-        });
+
     });
 
     $("body").on("click", "#addReport", _addReportHandler);
@@ -119,7 +74,6 @@ function _gotoHandler(){
         type: 'POST',
         data: {place: location},
         success: function(response){
-            console.log();
             if(response[0]){
                 var landmark = new google.maps.LatLng(response[0].x, response[0].y);
                 var keys = Object.keys(landmark);
@@ -138,6 +92,9 @@ function _gotoHandler(){
 }
 
 function _suggestRouteHandler(){
+    MARKER_FILTER = "Hide All";
+    toggleMarkersByFilter();
+
     var expDay = $('#route-durationDays').val();
     var expHour = $('#route-durationHours').val();
 
@@ -170,14 +127,14 @@ function _suggestRouteHandler(){
 
         MapHandler.clearControls();
 
-        var suggest_guide = "<h3>Click on map to place markers, drag markers to change route</h3>";
+        var suggest_guide = "Click on map to place markers, drag markers to change route";
         MapHandler.addUIControl(suggest_guide, google.maps.ControlPosition.BOTTOM_CENTER);
 
         MapHandler.addUIControl("Done", google.maps.ControlPosition.TOP_RIGHT, _saveRoute);
         MapHandler.addUIControl("Clear Markers", google.maps.ControlPosition.TOP_RIGHT, Route.resetMarkers);
         MapHandler.addUIControl("Cancel", google.maps.ControlPosition.TOP_RIGHT, function(){ suggestToNormal();  });
 
-        MapHandler.MAP.setZoom(15);
+        MapHandler.MAP.setZoom(16);
         Route.init(MapHandler.MAP, true); 
 }
 
@@ -214,8 +171,84 @@ function getReports(){
     });
 }
 
+function getRoadIntensity(link,obj, cb){
+    $.ajax({
+        url: BASE_URL + link,
+        type: 'POST',
+        success: function(response){
+            var flightPlanCoordinates = [];
 
-function seedTI(){
+            for(i in response){
+                road = JSON.parse(response[i].road);
+                flightPlanCoordinates = [];
+                for(j in road){
+                    var s = new google.maps.LatLng(road[j].lat, road[j].lng);
+                    flightPlanCoordinates.push(s);
+                }
+                var flightPath = new google.maps.Polyline({
+                    path: flightPlanCoordinates,
+                    geodesic: true,
+                    clickable: false,
+                    strokeColor: '#33b100',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 4,
+                    id: response[i].id
+                }); 
+
+                obj[flightPath.id] = flightPath;
+                flightPath.setMap(MapHandler.MAP);
+            }
+
+            if(typeof(cb) != "undefined"){
+                cb();
+            }else{
+                MARKER_FILTER = "View All";
+                toggleMarkersByFilter();
+            }
+            
+        }
+    });
+}
+function updateRoad(link,obj, cb){
+    $.ajax({
+        url: BASE_URL + link,
+        type: 'POST',
+        data: {},
+        success: function(response){
+            for(i in response){
+              if(typeof(obj[ response[i].id ]) != "undefined"){
+                if(response[i].status == "Light" && (response[i].lane == 1 || response[i].lane == 0)){
+                  obj[response[i].id].setOptions({strokeColor: '#33b100'});
+                }else if(response[i].status == "Medium" && (response[i].lane == 1 || response[i].lane == 0)){
+                  obj[response[i].id].setOptions({strokeColor: '#ffcc00'});
+                }else if(response[i].status == "Heavy" && (response[i].lane == 1 || response[i].lane == 0)){
+                  obj[response[i].id].setOptions({strokeColor: '#990000'});
+                }
+              }
+
+            }
+            if(typeof(cb) != "undefined"){  cb();   }
+        }
+    });
+}
+function getUpdate(link,obj){
+    $.ajax({
+        url: BASE_URL + link,
+        type: 'POST',
+        success: function(response){
+            for(i in response){
+                if(obj[response[i].id] == INTENSITIES_UNOFFICIAL[response[i].id]){
+                    if(obj[response[i].id]) obj[response[i].id].setVisible(false);
+                }
+
+                if(typeof(obj[ response[i].id ]) != "undefined")
+                obj[ response[i].id ].setIcon( getIcon(response[i].lane_1, response[i].lane_2) );
+            }
+        }
+    });
+}
+
+function seedTI(link,obj){
     var marker,mark;
     var x = 0;
     var marker_holder = {};
@@ -223,9 +256,8 @@ function seedTI(){
     IN = [];
     IN_E = [];
     $.ajax({
-        url: BASE_URL + 'getNode',
+        url: BASE_URL + link,
         type: 'POST',
-        data: {},
         success: function(response){
             for(i in response){
                 if(!marker_holder[response[i].id]){
@@ -237,10 +269,10 @@ function seedTI(){
                         visible: true,
                         id: response[i].id,
                         icon: IMG_BASE + 'g1.png',
-                        lane: response[i].lane_2
+                        lane: response[i].lane_2,
                     });
 
-                    INTENSITIES[_marker.id] = _marker;
+                    obj[_marker.id] = _marker;
                     google.maps.event.addListener(_marker, 'click', function(event) {
                         var new_cookie = get_cookie("TI-"+ this.id);
                         if(new_cookie >= MAX_TI_VOTE){
@@ -257,16 +289,16 @@ function seedTI(){
                     IN.push(_marker);
                 }
                 marker_holder[response[i].id].push(response[i]);
-            }
-            google.maps.event.addListener(MapHandler.MAP, 'zoom_changed', function() {
-                var zoomLevel = MapHandler.MAP.getZoom();
-                for(i in IN){
-                    if(typeof(IN[i]) != "undefined" ){
-                        IN[i].setVisible(zoomLevel > 14);
-                    }
+
+                if(obj == INTENSITIES_OFFICIAL){
+                    getUpdate('getUpdateOfficial',INTENSITIES_OFFICIAL);
+                }else{
+                    getUpdate('getUpdateUnofficial',INTENSITIES_UNOFFICIAL);
                 }
-            });
                 
+            }
+
+
         },
         error: function(){
             alert("ERROR");
@@ -275,6 +307,10 @@ function seedTI(){
 }
 
 function _saveRoute(){
+    if(Route.MARKERS.length < 2){
+        alert("Please plot a route");
+        return;
+    }
     var nodes = Route.getNodesStr(); //TRAP later
 
     var routes = {
@@ -301,8 +337,11 @@ function _saveRoute(){
 }
 
 function suggestToNormal(){
+    MARKER_FILTER = "View All";
+    toggleMarkersByFilter();
+
     MODE = MODES.NORMAL;
-    MapHandler.MAP.setZoom(13); //ZOOM OUT
+    MapHandler.MAP.setZoom(INIT_MAP_ZOOM); //ZOOM OUT
     Route.resetMarkers();
     MapHandler.MAP.controls[google.maps.ControlPosition.BOTTOM_CENTER].clear();
     MapHandler.MAP.controls[google.maps.ControlPosition.TOP_RIGHT].clear();
@@ -324,13 +363,12 @@ function _addReportHandler(){
     }
 
     if((expDay=="0") && (expHour=="0")){
-        console.log("aa");
         $("#info span#msg").text('Invalid input of duration!');
         $("#info").show();
         setTimeout(function(){  $("#info").hide("slow"); }, 1000);  
     }else{
         $("#reportSituation").modal('hide');
-        var location_guide = "<h3>Click on map to select location</h3>";
+        var location_guide = "Click on map to select location";
         MapHandler.clearControls();
         MapHandler.addUIControl(location_guide, google.maps.ControlPosition.BOTTOM_CENTER);
         

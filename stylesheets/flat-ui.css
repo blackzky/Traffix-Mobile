@@ -1137,9 +1137,9 @@ fieldset[disabled] .btn-link:focus {
 .navbar-inverse .nav > li > a {
   font-size: 16px;
   border-bottom: 2px solid #2c3e50;
-  border-left: 2px solid #2c3e50 !important;
+ /* border-left: 2px solid #2c3e50 !important;*/
   color: #ffffff;
-  padding: 16px 20px 15px;
+  padding: 16px 15px 15px;
   line-height: 20px;
 }
 .navbar-inverse .nav.navbar-right .dropdown-menu {
@@ -3391,16 +3391,15 @@ body.vjs-full-window {
   animation: sharp 2s ease infinite;
 }
 .login {
-  background: url(../images/login/imac.png) 0 0 no-repeat;
+  background-color:#BDC3C7;
   background-size: 940px 778px;
   color: #ffffff;
-  margin-bottom: 77px;
-  padding: 38px 38px 267px;
+  margin-bottom: 0px;
+  /*padding: 38px 38px 267px;*/
+  height: 100%;
   position: relative;
 }
 .login-screen {
-  background-color: #1abc9c;
-  min-height: 473px;
   padding: 123px 199px 33px 306px;
 }
 .login-icon {
@@ -3430,6 +3429,7 @@ body.vjs-full-window {
 .login-form {
   background-color: #edeff1;
   padding: 24px 23px 20px;
+  margin-left: 20px;
   position: relative;
   border-radius: 6px;
 }
