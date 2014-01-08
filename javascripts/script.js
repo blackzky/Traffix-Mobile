@@ -3,17 +3,20 @@ BASE_URL = window.location.origin + "/";
 USE_LOCAL = true; /* Modify this before deployment. Value depends on device type. */
 IMG_BASE = USE_LOCAL ? "img/" : "../img/";
 
-
-LIVE_URL = "http://10.10.33.83:3000/"; /*Modify this later to the production url */
-
+LIVE_URL = "http://cbtafcc.herokuapp.com/"; /*Modify this later to the production url */
+//LIVE_URL = "http://10.10.33.64:3000/"; /*Modify this later to the production url */
 
 IS_LOGGEDIN=false;
 
 $(function() {
     var origin = (window.location.port == "" ? (window.location.origin + ":3000") : window.location.origin) + "/";
-    BASE_URL = isMobile() ? LIVE_URL : origin;
+    //BASE_URL = isMobile() ? LIVE_URL : origin;
+    BASE_URL = LIVE_URL;
 
     $("nav#menu").mmenu({   position: "right",  zposition: "back"   });
+    $("#traffix-nav").on("click", "#menu-bars", function(){ 
+        $("#loading").hide();
+    });
     
     $(".page-links").on("click", "a", function(e){ 
         e.preventDefault(); 
@@ -108,5 +111,18 @@ function logout(){
     }
 }
 
+function fitContent(){  
+    var h = parseInt($("#traffix-nav").height());  
+    $("#traffix-content").height(window.innerHeight - h - 1); 
 
-function fitContent(){  var h = parseInt($("#traffix-nav").height());  $("#traffix-content").height(window.innerHeight - h - 1);   }
+    var x = ($("#loading").width()/2) - ($("#loading img").width()/2);
+    $("#loading img").css({
+        "position": "fixed",
+        "left": x + "px"
+    });
+    $("#loading").css({
+        "background":"white",
+        "height": $("#traffix-content").height() + "px",
+        "display": "none"
+    });  
+}
