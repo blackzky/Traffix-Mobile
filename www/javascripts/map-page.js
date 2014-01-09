@@ -68,26 +68,31 @@ $(function(){
 var Traffic_intensity_id, Click;
 
 function _gotoHandler(){
-    var location = prompt("Enter a location");
-    $.ajax({
-        url: BASE_URL + 'searchLandmark',
-        type: 'POST',
-        data: {place: location},
-        success: function(response){
-            if(response[0]){
-                var landmark = new google.maps.LatLng(response[0].x, response[0].y);
-                var keys = Object.keys(landmark);
-                var ob = (landmark[keys[0]].toFixed(3) == MapHandler.MAP.getCenter()[keys[0]].toFixed(3));
-                var pb = (landmark[keys[1]].toFixed(3) == MapHandler.MAP.getCenter()[keys[1]].toFixed(3));
-                if(ob && pb){
+    $('#name').val("");
+    $("#SearchLandMark").modal({show:'true', backdrop: 'static', keyboard: true });
+    $(".goSearch").on("click", "#go", function() {   
+        var location = $('#name').val();
+        $.ajax({
+            url: BASE_URL + 'searchLandmark',
+            type: 'POST',
+            data: {place: location},
+            success: function(response){
+                if(response[0]){
+                    var landmark = new google.maps.LatLng(response[0].x, response[0].y);
+                    var keys = Object.keys(landmark);
+                    var ob = (landmark[keys[0]].toFixed(3) == MapHandler.MAP.getCenter()[keys[0]].toFixed(3));
+                    var pb = (landmark[keys[1]].toFixed(3) == MapHandler.MAP.getCenter()[keys[1]].toFixed(3));
+                    if(ob && pb){
                     alert("You are already in that location");
+                    }else{
+                        MapHandler.MAP.panTo(landmark);    
+                    }
                 }else{
-                    MapHandler.MAP.panTo(landmark);    
+                    alert("Location was not found");
                 }
-            }else{
-                alert("Location was not found");
             }
-        }
+        });
+        $("#SearchLandMark").modal("hide");
     });
 }
 
