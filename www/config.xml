@@ -6,7 +6,7 @@
         id        = "com.cebu.traffix"
         version   = "1.3.2">
 
-    <name>Hello World</name>
+    <name>Cebu Traffic</name>
 
     <description>
         Traffix is a Cloud-based Traffic Advisory for Cebu City.
