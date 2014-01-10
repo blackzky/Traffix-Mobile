@@ -93,6 +93,7 @@ $(".two-lanes").on("click", ".light, .medium, .heavy", function() {
     }
   }
   $(".two-lanes-btn").attr('disabled', 'disabled');
+  $('#voteresponse').modal({show:'true', backdrop: 'static', keyboard: true });
   $("#TwoWay").modal("hide");
  // $(".two-lanes-btn").attr("disabled","disabled");   
 });

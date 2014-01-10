@@ -70,7 +70,9 @@ var Traffic_intensity_id, Click;
 function _gotoHandler(){
     $('#name').val("");
     $("#SearchLandMark").modal({show:'true', backdrop: 'static', keyboard: true });
-    $(".goSearch").on("click", "#go", function() {   
+
+}
+ $(".goSearch").on("click", "#go", function() {   
         var location = $('#name').val();
         $.ajax({
             url: BASE_URL + 'searchLandmark',
@@ -83,7 +85,7 @@ function _gotoHandler(){
                     var ob = (landmark[keys[0]].toFixed(3) == MapHandler.MAP.getCenter()[keys[0]].toFixed(3));
                     var pb = (landmark[keys[1]].toFixed(3) == MapHandler.MAP.getCenter()[keys[1]].toFixed(3));
                     if(ob && pb){
-                    alert("You are already in that location");
+                        alert("You are already in that location");
                     }else{
                         MapHandler.MAP.panTo(landmark);    
                     }
@@ -94,7 +96,6 @@ function _gotoHandler(){
         });
         $("#SearchLandMark").modal("hide");
     });
-}
 
 function _suggestRouteHandler(){
     MARKER_FILTER = "Hide All";
@@ -129,7 +130,7 @@ function _suggestRouteHandler(){
         END = $("#destination").val();
         ROUTE_DURATION_DAYS = $("#route-durationDays").val() || 0;
         ROUTE_DURATION_HOURS = $("#route-durationHours").val() || 0;
-
+        
         MapHandler.clearControls();
 
         var suggest_guide = "Click on map to place markers, drag markers to change route";
@@ -274,7 +275,7 @@ function seedTI(link,obj){
                         visible: true,
                         id: response[i].id,
                         icon: IMG_BASE + 'g1.png',
-                        lane: response[i].lane_2,
+                        lane: response[i].lane_1,
                     });
 
                     obj[_marker.id] = _marker;
@@ -350,6 +351,7 @@ function suggestToNormal(){
     Route.resetMarkers();
     MapHandler.MAP.controls[google.maps.ControlPosition.BOTTOM_CENTER].clear();
     MapHandler.MAP.controls[google.maps.ControlPosition.TOP_RIGHT].clear();
+    MapHandler.addUIControl("OFFICIAL",google.maps.ControlPosition.TOP_RIGHT);
     MapHandler.MAP.setOptions({draggableCursor: "default"});
     
     google.maps.event.removeListener(Route.SUGGEST_ROUTE_LISTENER);
@@ -374,7 +376,6 @@ function _addReportHandler(){
     }else{
         $("#reportSituation").modal('hide');
         var location_guide = "Click on map to select location";
-        MapHandler.clearControls();
         MapHandler.addUIControl(location_guide, google.maps.ControlPosition.BOTTOM_CENTER);
         
         CREATE_REPORT_LISTENER = google.maps.event.addListener(MapHandler.MAP, "click", function(event) {
