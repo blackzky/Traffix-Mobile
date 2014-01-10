@@ -1,7 +1,7 @@
 BASE_URL = window.location.origin + "/";
 
-USE_LOCAL = true; /* Modify this before deployment. Value depends on device type. */
-IMG_BASE = USE_LOCAL ? "img/" : "../img/";
+USE_REMOTE = true; /* Modify this before deployment. Value depends on device type. */
+IMG_BASE = USE_REMOTE ? "img/" : "../img/";
 
 //LIVE_URL = "http://cbtafcc.herokuapp.com/"; /*Modify this later to the production url */
 LIVE_URL = "http://10.10.33.64:3000/"; /*Modify this later to the production url */
