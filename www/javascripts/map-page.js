@@ -20,8 +20,8 @@ $(function(){
     var sample = {};
     var x=0;
     MapHandler.setup({init_zoom: INIT_MAP_ZOOM}, function(map){
-        seedTI('getNodeOfficial',INTENSITIES_OFFICIAL);
-        seedTI('getNodeUnofficial',INTENSITIES_UNOFFICIAL);
+        seedTI(INTENSITIES_OFFICIAL);
+        seedTI(INTENSITIES_UNOFFICIAL);
 
         getRoadIntensity('getRoadIntensityUnofficial', ROAD_UNOFFICIAL);
         getRoadIntensity('getRoadIntensityOfficial', ROAD_OFFICIAL, function(){
@@ -179,13 +179,13 @@ function getReports(){
 
 function getRoadIntensity(link,obj, cb){
     $.ajax({
-        url: BASE_URL + link,
-        type: 'POST',
+        url: "data/road.traffic",
+        type: 'GET',
         success: function(response){
             var flightPlanCoordinates = [];
-
-            for(i in response){
-                road = JSON.parse(response[i].road);
+            roadDATA = JSON.parse(response);
+            for(i in roadDATA){
+                road = roadDATA[i].road;
                 flightPlanCoordinates = [];
                 for(j in road){
                     var s = new google.maps.LatLng(road[j].lat, road[j].lng);
@@ -198,7 +198,7 @@ function getRoadIntensity(link,obj, cb){
                     strokeColor: '#33b100',
                     strokeOpacity: 1.0,
                     strokeWeight: 4,
-                    id: response[i].id
+                    id: roadDATA[i].id
                 }); 
 
                 obj[flightPath.id] = flightPath;
@@ -254,7 +254,7 @@ function getUpdate(link,obj){
     });
 }
 
-function seedTI(link,obj){
+function seedTI(obj){
     var marker,mark;
     var x = 0;
     var marker_holder = {};
@@ -262,20 +262,21 @@ function seedTI(link,obj){
     IN = [];
     IN_E = [];
     $.ajax({
-        url: BASE_URL + link,
-        type: 'POST',
+        url: "data/node.traffic",
+        type: 'GET',
         success: function(response){
-            for(i in response){
-                if(!marker_holder[response[i].id]){
-                    marker_holder[response[i].id] = [];
+            intensity = JSON.parse(response);
+            for(i in intensity){
+                if(!marker_holder[intensity[i].id]){
+                    marker_holder[intensity[i].id] = [];
                     var _marker = new google.maps.Marker({
-                        position: new google.maps.LatLng(response[i].lat , response[i].lng),
+                        position: new google.maps.LatLng(intensity[i].lat , intensity[i].lng),
                         map: MapHandler.MAP,
-                        title: 'Traffic' + response[i].id,
+                        title: 'Traffic' + intensity[i].id,
                         visible: true,
-                        id: response[i].id,
+                        id: intensity[i].id,
                         icon: IMG_BASE + 'g1.png',
-                        lane: response[i].lane_1,
+                        lane: intensity[i].lane_1,
                     });
 
                     obj[_marker.id] = _marker;
@@ -294,7 +295,7 @@ function seedTI(link,obj){
                     });
                     IN.push(_marker);
                 }
-                marker_holder[response[i].id].push(response[i]);
+                marker_holder[intensity[i].id].push(intensity[i]);
 
                 if(obj == INTENSITIES_OFFICIAL){
                     getUpdate('getUpdateOfficial',INTENSITIES_OFFICIAL);

@@ -39,7 +39,7 @@ body { height: 100%; margin: 0; font-family: "Lato", Helvetica, Arial, sans-seri
 
 .nav.navbar-right > li > a { border-radius: 0px !important;}
 #page,.wrapper, #map-canvas, #page-container{
-  width:100%;
+  width:100% !important;
   height:100%;
 }
 #acctStatus{
@@ -69,6 +69,11 @@ body { height: 100%; margin: 0; font-family: "Lato", Helvetica, Arial, sans-seri
   resize: none;
 }
 
+@media(min-width: 324px) and (max-width: 662px){
+  .acc{
+   width: 100% !important;
+  }
+}
 .acc{
   width: 300px;
   height: 110px;
@@ -102,10 +107,35 @@ body { height: 100%; margin: 0; font-family: "Lato", Helvetica, Arial, sans-seri
 #page-container #container{
   width: 100%;
   position: relative;
-  left: 20px;
+  padding: 20px;
 }
 
 #manage-search{
   margin: 10px 0;
   width: 100%;
+}
+
+.tip a[href="#page"] {
+border-radius: 10px;
+background: #CD5C5C;
+color: #fff;
+font-size: 12px;
+font-weight: bold;
+text-align: center;
+text-decoration: none;
+line-height: 20px;
+display: block;
+width: 20px;
+height: 20px;
+position: absolute;
+top: 20px;
+right: 20px;
+}
+
+.popmodal{
+  background: #f1f1f1 !important;
+  color: #4d4d4d !important;
+}
+.popmodal h6{
+  border-bottom: 1px solid #4d4d4d;
 }

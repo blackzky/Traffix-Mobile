@@ -2,7 +2,7 @@ $(function(){
 
 	MapHandler.setup({init_zoom: 14}, function(map){
 		MapHandler.MAP.setOptions({draggableCursor: "crosshair"});
-		
+
 		google.maps.event.addListener(map, "click", function(event) {
 			var lat = event.latLng.lat();
 			var lng = event.latLng.lng();
@@ -16,5 +16,6 @@ $(function(){
 
 		});//end of click event 
 	});//end of setup
+
 });
 

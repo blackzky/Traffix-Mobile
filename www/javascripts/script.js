@@ -14,6 +14,8 @@ $(function() {
     BASE_URL = LIVE_URL;
 
     $("nav#menu").mmenu({   position: "right",  zposition: "back"   });
+    
+
     $("#traffix-nav").on("click", "#menu-bars", function(){ 
         $("#loading").hide();
     });
