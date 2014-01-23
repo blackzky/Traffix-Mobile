@@ -13,9 +13,11 @@
     <script type="text/javascript" src="javascripts/jquery.js"></script>
     <script type="text/javascript" src="javascripts/bootstrap.min.js"></script>
     <script type="text/javascript" src="javascripts/jquery.mmenu.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
 		<script type="text/javascript" src="javascripts/MapHandler.js"></script>
     <script type="text/javascript" src="javascripts/Route.js"></script>
 		<script type="text/javascript" src="javascripts/script.js"></script>
+    <script type="text/javascript" src="javascripts/localstorage.js"></script>
 	</head>
 	<body>
     <div id="page">    
@@ -41,8 +43,13 @@
       </div>
 
       <div id="traffix-content" class="wrapper">
-  		  <div id="page-container"></div>
-        <div id="loading" style="margin:0 auto;"><img src="images/loading.gif" /></div>
+  		  <div id="page-container">
+          <a href="#" class="btn btn-info" id="change_live_url">Change LIVE_URL</a>
+        </div>
+        <div id="loading">
+          <img src="images/loading.gif" />
+          <div id="yellow-box" style="position: fixed; right: 0; width:10px;height: 10px;background: lightgray;"></div>
+        </div>
 
       </div>
 

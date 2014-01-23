@@ -20,6 +20,7 @@ var MapHandler = {
 	customEvents: null,
 	src: "",
 	EVENTS: {},
+	_cebuBounds: null,
 
 	/* This function must be called only once.. */
 	setup: function(options, callback) {
@@ -147,7 +148,7 @@ var MapHandler = {
 	clearControls: function(){
         MapHandler.MAP.controls[google.maps.ControlPosition.BOTTOM_CENTER].clear();
         MapHandler.MAP.controls[google.maps.ControlPosition.TOP_RIGHT].clear();
-        
+        MapHandler.MAP.controls[google.maps.ControlPosition.CENTER].clear();
 	},
 
 	/*
@@ -164,7 +165,7 @@ var MapHandler = {
 			new google.maps.LatLng(endBounds.lat(), startBounds.lng())
 		];
 
-		var _cebuBounds = new google.maps.Polygon({
+		MapHandler._cebuBounds = new google.maps.Polygon({
 			paths: _cebuBoundsPath,
 			strokeColor: '#FF0000',
 			strokeOpacity: 0.8,
@@ -173,9 +174,13 @@ var MapHandler = {
 			fillOpacity: 0.1
 		});
 
-		_cebuBounds.setMap(MapHandler.MAP);
-
-		new google.maps.Marker({ position: MapHandler._getMapCenter(), map: MapHandler.MAP, title: 'Center' });
+		MapHandler._cebuBounds.setMap(MapHandler.MAP);
+		BOUNDS_VISIBILITY = true;
+	},
+	
+	hideBounds: function(){
+		MapHandler._cebuBounds.setMap(null);
+		BOUNDS_VISIBILITY = false;
 	}
 
 };

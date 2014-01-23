@@ -6,13 +6,13 @@ INTENSITIES_OFFICIAL = {};
 INTENSITIES_UNOFFICIAL = {};
 REPORT_MARKERS = {};
 MAX_TI_VOTE = 3;
-MAX_CREATE_REPORT = 3;
-MAX_DOWNVOTE_REPORT = 1;
 REPORT_MARKERS_COUNT=0;
 ROAD_OFFICIAL = {};
 ROAD_UNOFFICIAL = {};
 MARKER_FILTER = "View All";
 INIT_MAP_ZOOM = 15;
+BOUNDS_VISIBILITY= false,
+
 
 $(function(){
     CREATE_REPORT_LISTENER = null;
@@ -30,27 +30,12 @@ $(function(){
             });
         });
 
-        /*
-        if(typeof(ROAD_UNOFFICIAL) != "undefined") updateRoad('updateRoadUnofficial', ROAD_UNOFFICIAL);
-        if(typeof(ROAD_OFFICIAL) != "undefined") updateRoad('updateRoadOfficial', ROAD_OFFICIAL);
-        updateRoad('updateRoadOfficial', ROAD_OFFICIAL);
-        updateRoad('updateRoadUnofficial', ROAD_UNOFFICIAL);
-        */
- 
         
         if(typeof(TOGGLE_MARKERS_VISIBILITY) != "undefined") google.maps.event.removeListener(TOGGLE_MARKERS_VISIBILITY);
         TOGGLE_MARKERS_VISIBILITY = google.maps.event.addListener(MapHandler.MAP, 'zoom_changed', function() {
                 toggleMarkersByFilter();
         });
-        /*if(MARKER_FILTER == "View All" || MARKER_FILTER == "OFFICIAL"){
-            MapHandler.addUIControl("OFFICIAL", 
-                google.maps.ControlPosition.TOP_RIGHT
-            );
-        }else if(MARKER_FILTER == "Traffic Intensity - UnOfficial"){
-            MapHandler.addUIControl("UNOFFCIAL", 
-                google.maps.ControlPosition.TOP_RIGHT
-            );
-        }*/
+
         getReports();
 
     });
@@ -61,46 +46,57 @@ $(function(){
     $(".mapnav").on("click", ".suggest", _suggestRoutePopop);
     $(".mapnav").on("click", ".report", _createReport);
     $(".mapnav").on("click", ".filter", function(){});
+    $("#suggestRoute").on("click", ".closeSR", function(){suggestToNormal();});
+    $("#confirmReport").on("click", ".closeCR", function(){setmapPageDefault();});
     $("#info").hide();
+
+    $("#suggestRoute").on("input", ".limited-input", function(e){
+        var max = $(this).data("max-length");
+        var value = this.value;
+        if(value.length > parseInt(max)){
+            this.value = value.substring(0, parseInt(max));
+            _showSuggestRouteError("Max length of " + (this.id || "input") + " is " + max, 1000);
+        }
+    });
 });
 
+function setmapPageDefault(){
+    MARKER_FILTER = "View All";
+    toggleMarkersByFilter();
 
+    MODE = MODES.NORMAL;
+    MapHandler.MAP.setZoom(INIT_MAP_ZOOM);
+    $(".msgbox").hide();
+    $(".navbox").hide();
+    $('.mapnav').show();
+}
 var Traffic_intensity_id, Click;
 
 function _gotoHandler(){
+    $(".slError1").hide();
+    $(".slError2").hide();
+    $(".slError3").hide();
     $('#name').val("");
-    $("#SearchLandMark").modal({show:'true', backdrop: 'static', keyboard: true });
-
-}
- $(".goSearch").on("click", "#go", function() {   
-        var location = $('#name').val();
-        $.ajax({
-            url: BASE_URL + 'searchLandmark',
-            type: 'POST',
-            data: {place: location},
-            success: function(response){
-                if(response[0]){
-                    var landmark = new google.maps.LatLng(response[0].x, response[0].y);
-                    var keys = Object.keys(landmark);
-                    var ob = (landmark[keys[0]].toFixed(3) == MapHandler.MAP.getCenter()[keys[0]].toFixed(3));
-                    var pb = (landmark[keys[1]].toFixed(3) == MapHandler.MAP.getCenter()[keys[1]].toFixed(3));
-                    if(ob && pb){
-                        alert("You are already in that location");
-                    }else{
-                        MapHandler.MAP.panTo(landmark);    
-                    }
-                }else{
-                    alert("Location was not found");
-                }
-            }
-        });
-        $("#SearchLandMark").modal("hide");
+    $("#SearchLandMark").trigger("open.mm").off("opened.mm").on("opened.mm",function(){
+        $("#name").focus();
     });
+    $("#landmark-results").html('');
+}
 
-function _suggestRouteHandler(){
+function _showSuggestRouteError(msg, duration){
+    $("#errorMsg span").text(msg);
+    $("#errorMsg").show();
+    setTimeout(function(){
+        $("#errorMsg").hide("slow");
+    }, parseInt(duration) || 1000);
+}
+
+function _suggestRouteHandler(e){
+   
     MARKER_FILTER = "Hide All";
     toggleMarkersByFilter();
-
+    $("#mapstat").hide();
+    $('.mapnav').hide();
     var expDay = $('#route-durationDays').val();
     var expHour = $('#route-durationHours').val();
 
@@ -109,39 +105,42 @@ function _suggestRouteHandler(){
         if(expHour == ""){      expHour = "0";  }
     }
     if( ($('#origin').val() == "") || ($('#destination').val() == "")){
-        $("#errorMsg span").text('Input origin and destination!');
-        $("#errorMsg").show();
-        setTimeout(function(){
-            $("#errorMsg").hide("slow");
-        }, 1000);
+        _showSuggestRouteError('Both fields must not be blank!', 1000);
         return;
     }else if((expDay=="0") && (expHour=="0")){
-        $("#errorMsg span").text('Invalid input of duration!');
-        $("#errorMsg").show();
-        setTimeout(function(){
-            $("#errorMsg").hide("slow");
-        }, 1000);
+        _showSuggestRouteError('Duration must not be zero!', 1000);
         return;
     }
+    e.preventDefault();
+    $(".mapnav").hide();
+    $("#suggestRoute").trigger("close");
+    START = $("#origin").val();
+    END = $("#destination").val();
 
-        $("#suggestRoute").modal("hide");
-
-        START = $("#origin").val();
-        END = $("#destination").val();
+    ROUTE_DURATION_MINS = ROUTES_CONFIG.min;
+    if(IS_LOGGEDIN){
         ROUTE_DURATION_DAYS = $("#route-durationDays").val() || 0;
         ROUTE_DURATION_HOURS = $("#route-durationHours").val() || 0;
-        
-        MapHandler.clearControls();
+    }else{
+        ROUTE_DURATION_DAYS = ROUTES_CONFIG.day;
+        ROUTE_DURATION_HOURS = ROUTES_CONFIG.hour;
+    }
+    var suggest_guide = "Click on map to place markers, drag markers to change route";
+    $(".msgbox").html("<p style=\"margin: 0 !important; \"> " + suggest_guide + "</p>");
+    $(".msgbox").show();
+    $(".navbox").show();
+    $("#page-container").on("click", ".roback", function(){
+        viewPage("routes");
+        $(".mapnav").show();
+    });
 
-        var suggest_guide = "Click on map to place markers, drag markers to change route";
-        MapHandler.addUIControl(suggest_guide, google.maps.ControlPosition.BOTTOM_CENTER);
+    $("#page-container").off("click", ".srcancel").on("click", ".srcancel", suggestToNormal);
+    $("#page-container").off("click", ".srclear").on("click", ".srclear", Route.resetMarkers);
+    $("#page-container").off("click", ".srdone").on("click", ".srdone", _saveRoute);
 
-        MapHandler.addUIControl("Done", google.maps.ControlPosition.TOP_RIGHT, _saveRoute);
-        MapHandler.addUIControl("Clear Markers", google.maps.ControlPosition.TOP_RIGHT, Route.resetMarkers);
-        MapHandler.addUIControl("Cancel", google.maps.ControlPosition.TOP_RIGHT, function(){ suggestToNormal();  });
-
-        MapHandler.MAP.setZoom(16);
-        Route.init(MapHandler.MAP, true); 
+    MapHandler.MAP.setZoom(16);
+    Route.init(MapHandler.MAP, true); 
+    
 }
 
 function getReports(){
@@ -164,12 +163,21 @@ function getReports(){
 
         google.maps.event.addListener(marker, 'click', function(event) {
             var id = "#reports-" + this.id;
-            var status = ($(id).data('official')) ? 'Official': 'Unofficial';
-            var date = new Date($(id).data('created'));
+            var status = ($(id).data('official')) ? 'Verified': 'Not Verified';
+            var d = $(id).data('created').split("-");
+            d[1] = parseInt(d[1]) + 1;
+            var date = new Date(d.join("-"));
             var createDate = (date.getMonth()+ parseInt(1)) + '-' + date.getDate() + '-' + date.getFullYear();
             $('#downvoteReport').removeAttr("disabled");
-            $('#openReport').modal({show:'true', backdrop: 'static', keyboard: true });
-            $('#displayReportInfo').html('Report Type: ' + $(id).data('type') + '<br/>Details: ' + $(id).data('details') + '<br/>Created At: '+ createDate + '<br/>Status: ' + status);
+            $('#openReport').trigger('open');
+            $('.displayReportInfo').html('<div class="form-group"><label>Report Type:</label> <div class="form-control">' + $(id).data('type') + '</div> </div> <div class="form-group"> <label>Details:</label> <div class="form-control" style="overflow: auto; height: 100%; min-height:42px;">' + unescape($(id).data('details')) + '</div> </div>');
+            $('.datestamp').html('<label><em>Created at:</em> '+ createDate + ' </label>');
+            $('.statstamp').html(status);
+            if(status == 'Verified'){
+                $('.statstamp').addClass('verified');
+            }else
+                $('.statstamp').removeClass('verified');
+
             $('#downvotes').html($(id).data('downvotes'));
             $('#downvotesAmt').val($(id).data('downvotes'));
             $('#reportId').val($(id).data('id'));
@@ -281,15 +289,67 @@ function seedTI(obj){
 
                     obj[_marker.id] = _marker;
                     google.maps.event.addListener(_marker, 'click', function(event) {
-                        var new_cookie = get_cookie("TI-"+ this.id);
-                        if(new_cookie >= MAX_TI_VOTE){
+                        TI_COUNT = parseInt( (localStorage.getItem('TI-'+ this.id) == null) ? 0 : localStorage.getItem('TI-'+ this.id) );
+                        if(TI_COUNT >= MAX_TI_VOTE){
                             alert("CAN'T VOTE");
                         }else{
                             Traffic_intensity_id = this.id;
-                            if(this.lane != "NONE"){
-                                $('#TwoWay').modal({show:'true', backdrop: 'static', keyboard: true });
+                            if(MARKER_FILTER.toLowerCase() == OFFICIAL_TRAFFIC.toLowerCase() || MARKER_FILTER.toLowerCase() == "view all"){
+                                lastUpdate = "getLastUpdateOfficial";
                             }else{
-                                $('#OneWay').modal({show:'true', backdrop: 'static', keyboard: true });
+                                $(".msgTI").hide(); 
+                                lastUpdate = "getLastUpdateUnofficial";
+                            }
+                            $.ajax({
+                                url: BASE_URL + lastUpdate,
+                                type: 'POST',
+                                data: {id: this.id},
+                                success: function(response){
+                                    $(".ti_icon").html("<img src = " +getIcon(response[0].lane_1, response[0].lane_2) +">");
+                                    var out = "";
+                                    if(response[0].last_update == "0000-00-00 00:00:00"){
+                                        out = "-- --:--";
+                                    }
+                                    else{
+                                        var date1 = new Date(response[1]);
+                                        var date2 = new Date(response[0].last_update);
+                                        var ddf = date1.getDate() - date2.getDate();
+                                        var hdf = date1.getHours() - date2.getHours();
+                                        var mdf = date1.getMinutes() - date2.getMinutes();
+                                        
+                                        if(mdf < 0){
+                                            mdf = mdf +  60;
+                                            hdf--;
+                                        }
+                                        if(hdf < 0){
+                                            hdf = hdf + 24;
+                                            ddf--;
+                                        }
+                                        if(ddf != 0) out += ddf+"D ";
+                                        if(hdf != 0) out += hdf+"H ";
+                                        if(mdf != 0) out += mdf + "M ";
+                                        if(out=="") out = " just now";
+                                        else out += " ago";
+                                    }
+                                    if(MARKER_FILTER.toLowerCase() == OFFICIAL_TRAFFIC.toLowerCase() || MARKER_FILTER.toLowerCase() == "view all"){
+                                        $(".lastUpdate").html(out);
+                                    }else{
+                                        $(".lastUpdate").html(out);
+                                    }
+                                }
+                                });
+                            if(IS_LOGGEDIN)
+                                $(".msgTI").hide();
+
+                            if(this.lane != "NONE"){
+                                $(".lane-options").show();
+                                $(".two-lanes").show();
+                                $(".lupdate").show();
+                                $('#TwoWay').trigger('open');
+                            }else{
+                                $(".one-lane").show();
+                                $(".lupdate").show();
+                                $('#OneWay').trigger('open');
                             }
                         }
                     });
@@ -315,7 +375,8 @@ function seedTI(obj){
 
 function _saveRoute(){
     if(Route.MARKERS.length < 2){
-        alert("Please plot a route");
+        $("#alertDialog").html("Please plot a route.").removeClass().addClass('alert alert-danger');
+        $("#alertbox").trigger("open");
         return;
     }
     var nodes = Route.getNodesStr(); //TRAP later
@@ -326,18 +387,25 @@ function _saveRoute(){
         end: END,
         days: ROUTE_DURATION_DAYS,
         hours: ROUTE_DURATION_HOURS,
+        min: ROUTE_DURATION_MINS,
         nodes: nodes
     };
-
     $.ajax({
         url: BASE_URL + 'addRoutes',
         type: 'POST',
         data: routes, 
         success: function(response){
             if(response == "TRUE"){
+                $("#alertDialog").html("Success: Suggested routes has been added.").removeClass().addClass('alert alert-success');
+                $("#alertbox").trigger("open");
+                if(!IS_LOGGEDIN){
+                    SUGGEST_NUMBER += 1;
+                    setHtmlStorage('Route-create', SUGGEST_NUMBER, 60);
+                }
                 suggestToNormal();
             }else{
-                alert("Adding the suggested route has failed");
+                $("#alertDialog").html("Error: Adding the suggested route has failed.").removeClass().addClass('alert alert-danger');
+                $("#alertbox").trigger("open");
             }
         }
     });
@@ -346,13 +414,16 @@ function _saveRoute(){
 function suggestToNormal(){
     MARKER_FILTER = "View All";
     toggleMarkersByFilter();
-
+    $(".msgbox").hide();
+    $(".navbox").hide();
+    $('.mapnav').show();
     MODE = MODES.NORMAL;
     MapHandler.MAP.setZoom(INIT_MAP_ZOOM); //ZOOM OUT
     Route.resetMarkers();
     MapHandler.MAP.controls[google.maps.ControlPosition.BOTTOM_CENTER].clear();
     MapHandler.MAP.controls[google.maps.ControlPosition.TOP_RIGHT].clear();
-    MapHandler.addUIControl("OFFICIAL",google.maps.ControlPosition.TOP_RIGHT);
+    $("#mapstat").html("<p style=\"margin: 0 !important;\">OFFICIAL</p>").addClass('verified');
+    $("#mapstat").show();
     MapHandler.MAP.setOptions({draggableCursor: "default"});
     
     google.maps.event.removeListener(Route.SUGGEST_ROUTE_LISTENER);
@@ -364,7 +435,13 @@ function _addReportHandler(){
 
     var expDay = $('#durationDays').val();
     var expHour = $('#durationHours').val();
+    var startLat = 10.360515;
+    var startLng = 123.874441;
+    var endLat = 10.291105;
+    var endLng = 123.92448;
 
+    $("#mapstat").hide();
+    $(".mapnav").hide();
     if(IS_OFFICIAL == 1){
         if(expDay==""){expDay = "0";}
         if(expHour==""){expHour = "0";}
@@ -375,41 +452,58 @@ function _addReportHandler(){
         $("#info").show();
         setTimeout(function(){  $("#info").hide("slow"); }, 1000);  
     }else{
-        $("#reportSituation").modal('hide');
-        var location_guide = "Click on map to select location";
-        MapHandler.addUIControl(location_guide, google.maps.ControlPosition.BOTTOM_CENTER);
-        
+        $("#reportSituation").trigger("close");
+        var report_guide = "Click on map to select location";
+        var report2_guide = "Cannot place report here. Place report inside the RED area.";
+        $(".msgbox").html("<p style=\"margin: 0 !important; \"> " + report_guide + "</p>").show();
         CREATE_REPORT_LISTENER = google.maps.event.addListener(MapHandler.MAP, "click", function(event) {
             var lat = event.latLng.lat();
             var lng = event.latLng.lng();
-            MapHandler.MAP.controls[google.maps.ControlPosition.BOTTOM_CENTER].clear();
 
-            $('#confirmReport').modal({show:'true', backdrop: 'static', keyboard: true });
-            $('#lat').val(lat);
-            $('#lng').val(lng);
-            $('#days').val(expDay);
-            $('#hours').val(expHour);
-            $('#confirmDetails').html('Report Type: ' + $('#reportType').val() + '<br/>Report Details: '+ $('#reportDetails').val()+'<br/>Lat: '+lat+'<br/>Lng:'+lng);
+            if( ((lat <  startLat) && (lng > startLng)) && ((lat >  endLat) && (lng < endLng)) ){
+
+                $('#confirmReport').trigger("open");
+                $('#lat').val(lat);
+                $('#lng').val(lng);
+                $('#days').val(expDay);
+                $('#hours').val(expHour);
+                $('#confirmDetails').html('<div class="col-md-6"> <div class="form-group"> <label class="control-label">Report Type:</label> <div class="form-control">'+$('#reportType').val()+'</div> </div> <div class="form-group"> <label class="control-label" rows="3">Details:</label> <div class="form-control" style="overflow: auto; height: 100% !important;">'+$('#reportDetails').val()+' </div> </div> </div> <div class="col-md-6"> <div class="form-group" style="margin-bottom: 0px;"> <div style="text-align: center; padding-top: 30px;"><img src="https://maps.googleapis.com/maps/api/staticmap?center='+lat+','+lng+'&zoom=15&size=240x200&markers='+lat+','+lng+'&sensor=false"><br/> <p style="font-size: x-small !important; line-height:1 !important; margin-bottom: 0px;">Lat:'+lat+'<br/>Lng:'+lng+'</p> </div> </div> </div>');
+            }
+            else{
+                if(!BOUNDS_VISIBILITY){
+                    $(".msgbox").html("<p style=\"margin: 0 !important; \"> " + report2_guide + "</p>").show();
+                    MapHandler.showBounds();
+                    setTimeout(function(){
+                        MapHandler.hideBounds();
+                        $(".msgbox").html("<p style=\"margin: 0 !important; \"> " + report_guide + "</p>").show();
+                    }, 2000);
+                }
+            }
         });
     }
 }
     
 function _createReport(){
-    var create_report_cookie = get_cookie("Report-create");
+    //var create_report_cookie = get_cookie("Report-create");
+    REPORT_NUMBER = parseInt( (localStorage.getItem('Report-create') == null) ? 0 : localStorage.getItem('Report-create') );
 
-    /* if refactored.. check condition if < or <=*/
-    if(create_report_cookie < MAX_CREATE_REPORT){
+    //if(create_report_cookie < MAX_CREATE_REPORT){
+    if(REPORT_NUMBER < REPORTS_CONFIG.max_create||IS_LOGGEDIN){
 
          if(MODE == MODES.NORMAL){
             MODE = MODES.REPORT;
 
+            MARKER_FILTER = "Hide All";
+            toggleMarkersByFilter();
+
             $('#reportDetails').val("");
             $('#durationDays').val("");
             $('#durationHours').val("");
-            $('#txtCount').val(MAXCHAR);
-            $('#reportSituation').modal({show:'true', backdrop: 'static', keyboard: true });
-        }
-        else{
+            $('#txtCount').html(MAXCHAR);
+            $(".limitdicator").removeClass('atlimit');
+            $("#reportDetails").removeClass('atlimit');
+            $('#reportSituation').trigger("open");
+        }else{
             alert('report - invalid action');
         }
     }
@@ -419,18 +513,15 @@ function _createReport(){
 }
 
 function _suggestRoutePopop(){
-    if(MODE == MODES.NORMAL){
-        MODE = MODES.SUGGEST;
-
+    SUGGEST_NUMBER = parseInt( (localStorage.getItem('Route-create') == null) ? 0 : localStorage.getItem('Route-create') );
+    if(SUGGEST_NUMBER<ROUTES_CONFIG.max_create||IS_LOGGEDIN){
         $('#origin').val("");
         $('#destination').val("");
         $('#route-durationDays').val("");
         $('#route-durationHours').val("");
         $("#suggestRoute #errorMsg").hide();
-        $("#suggestRoute").modal({show:'true', backdrop: 'static', keyboard: true });
-    }
-    else{
-        alert('suggest -invalid action');
-        return;
+        $("#suggestRoute").trigger('open');
+    }else{
+        alert("Can't create routes anymore.");
     }
 }

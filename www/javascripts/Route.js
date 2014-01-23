@@ -16,7 +16,7 @@ var Route = {
         Route.SERVICE = new google.maps.DirectionsService();
         Route.POLY = new google.maps.Polyline({
             map: map,
-            strokeColor: '#00FFFF',
+            strokeColor: '#de5842',
             strokeOpacity: 0.6,
             strokeWeight: 5
         });
@@ -36,7 +36,7 @@ var Route = {
         Route.ALPHA_IDX = 0;
         Route.SEGMENTS = [];
         Route.MARKERS = [];
-        Route.POLY.setPath([]);
+        if(Route.POLY != null) Route.POLY.setPath([]);
     },
 
     _createMarkers: function(nodes){
