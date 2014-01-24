@@ -11,7 +11,7 @@ REPORTS_CONFIG = {};
 TRAFFIC_CONFIG = {};
 
 //LIVE_URL = "http://cbtafcc.herokuapp.com/"; /*Modify this later to the production url */
-BASE_URL = "http://10.10.33.64:3000/"; /*Modify this later to the production url */
+BASE_URL = "http://162.243.13.208/"; /*Modify this later to the production url */
 
 $(function() {
     $("nav#menu").mmenu({   position: "right",  zposition: "back"   });
