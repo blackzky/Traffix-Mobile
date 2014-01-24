@@ -12,17 +12,6 @@ TRAFFIC_CONFIG = {};
 BASE_URL = "http://162.243.13.208/";
 
 $(function() {
-    if(hasStorage() && (window.location.origin.search("file:///") == -1)){
-        if(localStorage.getItem("BASE_URL")){
-            BASE_URL = localStorage.getItem("BASE_URL");
-        }else{
-            if(window.location.origin.search("162.243.13.208") == -1){
-                _setBaseURL();
-            }
-        }
-    }
-    
-    
     $("nav#menu").mmenu({   position: "right",  zposition: "back"   });
     $("#traffix-nav").on("click", "#menu-bars", function(){ $("#loading").hide(); });
     
