@@ -1,4 +1,3 @@
-BASE_URL = window.location.origin + "/";
 IS_LOGGEDIN = false;
 IMG_BASE = "img/";
 UNOFFICIAL_TRAFFIC = "UnOfficial Traffic";
@@ -10,10 +9,20 @@ ROUTES_CONFIG = {};
 REPORTS_CONFIG = {};
 TRAFFIC_CONFIG = {};
 
-//LIVE_URL = "http://cbtafcc.herokuapp.com/"; /*Modify this later to the production url */
-BASE_URL = "http://162.243.13.208/"; /*Modify this later to the production url */
+BASE_URL = "http://162.243.13.208/";
 
 $(function() {
+    if(hasStorage() && (window.location.origin.search("file:///") == -1)){
+        if(localStorage.getItem("BASE_URL")){
+            BASE_URL = localStorage.getItem("BASE_URL");
+        }else{
+            if(window.location.origin.search("162.243.13.208") == -1){
+                _setBaseURL();
+            }
+        }
+    }
+    
+    
     $("nav#menu").mmenu({   position: "right",  zposition: "back"   });
     $("#traffix-nav").on("click", "#menu-bars", function(){ $("#loading").hide(); });
     
@@ -24,9 +33,7 @@ $(function() {
 
     $("#traffix-content").on("click", "#change_live_url, #yellow-box", function(e){
         e.preventDefault();
-        BASE_URL = prompt('Enter URL', BASE_URL) || BASE_URL;
-        if(hasStorage()) localStorage.setItem("BASE_URL", BASE_URL);
-        location.reload();
+        _setBaseURL();
     });
 
     fitContent();
@@ -195,11 +202,9 @@ function _loadLastVisitedPage(){
 }
 
 function _setBaseURL(){
-    if(hasStorage()){
-        if(localStorage.getItem("BASE_URL")){
-            BASE_URL = localStorage.getItem("BASE_URL");
-        }
-    }
+    BASE_URL = prompt('Enter URL', window.location.origin + "/") || BASE_URL;
+    if(hasStorage()) localStorage.setItem("BASE_URL", BASE_URL);
+    location.reload();
 }
 
 window.isMobile = function(){ return (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase()));  }

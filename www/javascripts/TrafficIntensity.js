@@ -55,7 +55,7 @@ $(".two-lanes").on("click", ".light, .medium, .heavy", function() {
 function _intensitySave(iv,lane){
   
   $.ajax({
-        url: '/intensityReport',
+        url: BASE_URL + 'intensityReport',
         type: 'POST',
         data: {traffic_intensity_id:Traffic_intensity_id , intensity_value:iv, lane: lane},
         success: function(results){
