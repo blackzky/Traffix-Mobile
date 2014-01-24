@@ -8,11 +8,11 @@ TRAFFIC_CONFIG={};
 UNOFFICIAL_TRAFFIC ="UnOfficial Traffic";
 OFFICIAL_TRAFFIC ="Official Traffic";
 //LIVE_URL = "http://cbtafcc.herokuapp.com/"; /*Modify this later to the production url */
-LIVE_URL = "http://192.168.254.106:3000/"; /*Modify this later to the production url */
+LIVE_URL = "http://10.10.33.64:3000/"; /*Modify this later to the production url */
 SOCKET = null;
 
 IS_LOGGEDIN=false;
-$.getScript(LIVE_URL+'socket.io/socket.io.js').done();
+//$.getScript(LIVE_URL+'socket.io/socket.io.js').done();
 $(function() {
    // $('#scriptChange').html('<scr'+'ipt type="text/javascript" src="'+LIVE_URL+'socket.io/socket.io.js"></sc'+'ript>');
  
