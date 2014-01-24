@@ -1,65 +1,58 @@
 BASE_URL = window.location.origin + "/";
-USE_REMOTE = true; /* Modify this before deployment. Value depends on device type. */
-IMG_BASE = USE_REMOTE ? "img/" : "../img/";
-REPORTS_CONFIG={};
-ROUTES_CONFIG={};
-REPORTS_CONFIG={};
-TRAFFIC_CONFIG={};
-UNOFFICIAL_TRAFFIC ="UnOfficial Traffic";
-OFFICIAL_TRAFFIC ="Official Traffic";
-//LIVE_URL = "http://cbtafcc.herokuapp.com/"; /*Modify this later to the production url */
-LIVE_URL = "http://10.10.33.64:3000/"; /*Modify this later to the production url */
+IS_LOGGEDIN = false;
+IMG_BASE = "img/";
+UNOFFICIAL_TRAFFIC = "UnOfficial Traffic";
+OFFICIAL_TRAFFIC = "Official Traffic";
 SOCKET = null;
 
-IS_LOGGEDIN=false;
-//$.getScript(LIVE_URL+'socket.io/socket.io.js').done();
+REPORTS_CONFIG = {};
+ROUTES_CONFIG = {};
+REPORTS_CONFIG = {};
+TRAFFIC_CONFIG = {};
+
+//LIVE_URL = "http://cbtafcc.herokuapp.com/"; /*Modify this later to the production url */
+BASE_URL = "http://10.10.33.64:3000/"; /*Modify this later to the production url */
+
 $(function() {
-   // $('#scriptChange').html('<scr'+'ipt type="text/javascript" src="'+LIVE_URL+'socket.io/socket.io.js"></sc'+'ript>');
- 
-    var origin = (window.location.port == "" ? (window.location.origin + ":3000") : window.location.origin) + "/";
-    //BASE_URL = isMobile() ? LIVE_URL : origin;
-    BASE_URL = LIVE_URL;
-    if(hasStorage()){
-        if(localStorage.getItem("BASE_URL")){
-            BASE_URL = localStorage.getItem("BASE_URL");
-        }else{
-            BASE_URL = LIVE_URL;  
-        }
-    }
-    SOCKET = io.connect(BASE_URL);
-
-    initConfig();
     $("nav#menu").mmenu({   position: "right",  zposition: "back"   });
-    
-
-    $("#traffix-nav").on("click", "#menu-bars", function(){ 
-        $("#loading").hide();
-    });
+    $("#traffix-nav").on("click", "#menu-bars", function(){ $("#loading").hide(); });
     
     $(".page-links").on("click", "a", function(e){ 
         e.preventDefault(); 
         viewPage(null, this);   
     });
-    if(hasStorage() && !isMobile()){
-        if(localStorage.getItem("CUR_PAGE")){
-            viewPage(localStorage.getItem("CUR_PAGE"));
-        }else{
-            viewPage("map");
-        }
-    }else{
-        viewPage("map");
-    }
-
-    $(window).resize(fitContent);
-    fitContent();
-    checkStats();
 
     $("#traffix-content").on("click", "#change_live_url, #yellow-box", function(e){
         e.preventDefault();
-        BASE_URL = prompt('Enter URL', LIVE_URL) || LIVE_URL;
+        BASE_URL = prompt('Enter URL', BASE_URL) || BASE_URL;
         if(hasStorage()) localStorage.setItem("BASE_URL", BASE_URL);
         location.reload();
     });
+
+    fitContent();
+    checkStats();
+
+    initConfig();
+
+    _loadSocketIO();
+
+    _loadLastVisitedPage();
+    $(window).resize(fitContent);
+});
+
+function _loadSocketIO(cb){
+    var script = document.createElement('script'); 
+    script.type = "text/javascript";
+    script.src = BASE_URL + "socket.io/socket.io.js";
+    var head = document.getElementsByTagName('head')[0];
+    head.appendChild(script);
+    script.onload = function() {
+        _webSocketReceivers();
+    };
+}
+
+function _webSocketReceivers(){
+    SOCKET = io.connect(BASE_URL);
 
     if(SOCKET){
         SOCKET.on('route-added', function (route) {
@@ -190,12 +183,26 @@ $(function() {
         });
 
     }
-
-});
-
-window.isMobile = function(){
-    return (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase()));
 }
+
+function _loadLastVisitedPage(){
+    if(hasStorage() && !isMobile()){
+        var cp = localStorage.getItem("CUR_PAGE");
+        viewPage(cp ? localStorage.getItem("CUR_PAGE") : "map");
+    }else{
+        viewPage("map");
+    }
+}
+
+function _setBaseURL(){
+    if(hasStorage()){
+        if(localStorage.getItem("BASE_URL")){
+            BASE_URL = localStorage.getItem("BASE_URL");
+        }
+    }
+}
+
+window.isMobile = function(){ return (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase()));  }
 
 window.hasStorage = function(){  return (typeof(Storage)!=="undefined"); }
 
@@ -253,35 +260,32 @@ function changeStatus(){
 
 function checkStats(){
     $.ajax({
-    url: BASE_URL + 'checkifloggedin',
-    type: 'POST',
-    data: {},
-    success: function(response){
-       if(response=='1'){
-            IS_LOGGEDIN=true;
-            changeStatus();
+        url: BASE_URL + 'checkifloggedin',
+        type: 'POST',
+        success: function(response){
+           if(response=='1'){
+                IS_LOGGEDIN = true;
+                changeStatus();
 
-        }else{
-            IS_LOGGEDIN=false;
-            changeStatus();
+            }else{
+                IS_LOGGEDIN = false;
+                changeStatus();
+            }
         }
-    }
     });
-
 }
-
 
 function logout(){
     if(IS_LOGGEDIN){
         $.ajax({
-        url: BASE_URL + 'logout',
-        type: 'GET',
-        data: {},
-        success: function(response){
-            IS_LOGGEDIN=false;
-            changeStatus();
-            viewPage("options");
-        }
+            url: BASE_URL + 'logout',
+            type: 'GET',
+            data: {},
+            success: function(response){
+                IS_LOGGEDIN = false;
+                changeStatus();
+                viewPage("options");
+            }
         });
     }
 }
@@ -301,7 +305,6 @@ function initConfig(){
     $.ajax({
         url: BASE_URL + 'getConfig',
         type: 'POST',
-        data: {}, 
         success: function(response){
             for(var i=0; i<response.length; i++) {
                 if(response[i].element=="report")
