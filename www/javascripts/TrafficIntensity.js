@@ -60,10 +60,10 @@ function _intensitySave(iv,lane){
         data: {traffic_intensity_id:Traffic_intensity_id , intensity_value:iv, lane: lane},
         success: function(results){
           if(IS_LOGGEDIN){
-              MARKER_FILTER = "Official Traffic";   
+              MARKER_FILTER = OFFICIAL_TRAFFIC;   
               toggleMarkersByFilter();
             }else{
-              MARKER_FILTER = "Unofficial Traffic";   
+              MARKER_FILTER = UNOFFICIAL_TRAFFIC;   
               toggleMarkersByFilter();
             }
         }

@@ -1,6 +1,6 @@
 IS_LOGGEDIN = false;
 IMG_BASE = "img/";
-UNOFFICIAL_TRAFFIC = "UnOfficial Traffic";
+UNOFFICIAL_TRAFFIC = "Unofficial Traffic";
 OFFICIAL_TRAFFIC = "Official Traffic";
 SOCKET = null;
 
@@ -9,10 +9,11 @@ ROUTES_CONFIG = {};
 REPORTS_CONFIG = {};
 TRAFFIC_CONFIG = {};
 
-BASE_URL = "http://162.243.13.208/";
+BASE_URL = "http://162.243.230.27/";
+
 
 $(function() {
-    $("nav#menu").mmenu({   position: "right",  zposition: "back"   });
+    $("nav#menu").mmenu({   position: "right",  zposition: "front"   });
     $("#traffix-nav").on("click", "#menu-bars", function(){ $("#loading").hide(); });
     
     $(".page-links").on("click", "a", function(e){ 
@@ -25,17 +26,32 @@ $(function() {
         _setBaseURL();
     });
 
+    userGuide();
     fitContent();
     checkStats();
 
     initConfig();
-
     _loadSocketIO();
 
     _loadLastVisitedPage();
     $(window).resize(fitContent);
 });
 
+$(function(){
+  if($(".pt-page-current").hasClass("pt-page-1")){
+    $("#ug-control").hide();
+  }
+  
+  $(".pt-trigger").on("click",function(){
+    if($(".pt-page-current").hasClass("pt-page-9") || $(".pt-page-current").hasClass("pt-page-1")){
+      $("#ug-control").hide();
+    }
+  });
+
+  $(".startUG").on("click",function(){
+    $("#ug-control").show();
+  });
+});
 function _loadSocketIO(cb){
     var script = document.createElement('script'); 
     script.type = "text/javascript";
@@ -54,23 +70,9 @@ function _webSocketReceivers(){
         SOCKET.on('route-added', function (route) {
             if($('#listdiv').length > 0){
                 $("#no-routes-info").hide();
-
-                var content = "<div class='" + (route.is_Official == 1 ? 'official' : 'unofficial') + "-routes'>"
-                content += "<a href='#' class='list-group-item alternative-route' data-id='" + route.id + "' id='route-item-" + route.id + "'>" + route.title;
-
-                if(route.is_Official == 1){
-                    content += "<span class='badge'>Official</span>";
-                }
-
-                content += "</a>";
-                content += createHiddenDom("route-" + route.id + "-title", route.title);
-                content += createHiddenDom("route-" + route.id + "-start", route.start);
-                content += createHiddenDom("route-" + route.id + "-end", route.end);
-                content += createHiddenDom("route-" + route.id + "-nodes", route.nodes);
-                content += createHiddenDom("route-" + route.id + "-is_Official", route.is_Official);
-                content += "</div>";
-
+                var content = Route.createList([route]);
                 $('#listdiv').append(content);
+                filterSearch();
             }
         });
     
@@ -96,14 +98,14 @@ function _webSocketReceivers(){
             });
 
             REPORT_MARKERS[report.id] = marker;
+            REPORT_MARKERS_COUNT++;
 
             google.maps.event.addListener(marker, 'click', function(event) {
                 var id = "#reports-" + this.id;
                 var status = ($(id).data('official')) ? 'Verified': 'Not Verified';
                 var d = $(id).data('created').split("-");
                 d[1] = parseInt(d[1]) + 1;
-                var date = new Date(d.join("-"));
-                var createDate = (date.getMonth()+ parseInt(1)) + '-' + date.getDate() + '-' + date.getFullYear();
+                var createDate = d.join("-");
                 $('#downvoteReport').removeAttr("disabled");
                 $('#openReport').trigger('open');
                 $('.displayReportInfo').html('<div class="form-group"><label>Report Type:</label> <div class="form-control">' + $(id).data('type') + '</div> </div> <div class="form-group"> <label>Details:</label> <div class="form-control" style="overflow: auto; height: 100%;">' + unescape($(id).data('details')) + '</div> </div>');
@@ -126,6 +128,7 @@ function _webSocketReceivers(){
             REPORT_MARKERS[id].setMap(null);
             delete REPORT_MARKERS[id];
             $("#reports-" + id).replaceWith("");
+            REPORT_MARKERS_COUNT--;
 
             if(MapHandler.MAP) toggleMarkersByFilter();
         });
@@ -137,16 +140,22 @@ function _webSocketReceivers(){
             $("#openReport #downvotesAmt").val( parseInt( report.votes ));
         });
 
+        SOCKET.on('report-update', function (report) {
+            var r = $("#reports-" + report.id); 
+            r.data("details", report.details );
+        });
+
         SOCKET.on('intensity-update', function(intensity) {
             if(intensity){
                 if(intensity.is_official == 1){
-                    if(INTENSITIES_OFFICIAL[intensity.id].getIcon() != getIcon(intensity.lane_1, intensity.lane_2)){
-                        INTENSITIES_OFFICIAL[intensity.id].setIcon( getIcon(intensity.lane_1, intensity.lane_2) );
+                    if(INTENSITIES_OFFICIAL[intensity.id].getIcon() != getIcon(intensity.lane_1, intensity.lane_2,intensity.id,intensity.is_vertical)){
+                        INTENSITIES_OFFICIAL[intensity.id].setIcon( getIcon(intensity.lane_1, intensity.lane_2,intensity.id,intensity.is_vertical) );
                     }
                 }
                 if(intensity.is_official == 0){
-                    if(INTENSITIES_UNOFFICIAL[intensity.id].getIcon() != getIcon(intensity.lane_1, intensity.lane_2)){
-                        INTENSITIES_UNOFFICIAL[intensity.id].setIcon( getIcon(intensity.lane_1, intensity.lane_2) );
+                    if(INTENSITIES_UNOFFICIAL[intensity.id].getIcon() != getIcon(intensity.lane_1, intensity.lane_2,intensity.id,intensity.is_vertical)){
+                        INTENSITIES_UNOFFICIAL[intensity.id].setIcon( getIcon(intensity.lane_1, intensity.lane_2,intensity.id,intensity.is_vertical) );
+                        console.log("ID: " + intensity.id + " vertical: " + intensity.is_vertical);
                     }
                 }
             }
@@ -315,3 +324,28 @@ function initConfig(){
 function createHiddenDom(id, value){
     return "<input type='hidden' id='" + id + "' value='" + value + "' />";
 }
+
+function modalTop(e){
+    $("#"+e+" .mm-panel").scrollTop(0);
+}
+function userGuide(){
+    var cp = localStorage.getItem("FRUN");
+    if(hasStorage()){
+        if(cp==undefined){
+            showUserGuide();
+            localStorage.setItem("FRUN","0");
+        }else if(cp==1){
+            hideUserGuide("1");
+        }
+    }
+}
+function showUserGuide(){
+    $("#userguide").show();
+    $(".ug-overlay").show();
+}
+function hideUserGuide(e){
+    localStorage.setItem("FRUN",''+e);
+    $("#userguide").hide();
+    $(".ug-overlay").hide();
+}
+

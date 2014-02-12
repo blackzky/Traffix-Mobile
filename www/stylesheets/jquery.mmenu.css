@@ -6,16 +6,19 @@ html.mm-opened #mm-blocker,
 html.mm-opened .mm-fixed-top,
 html.mm-opened .mm-fixed-bottom,
 html.mm-opened .mm-menu.mm-horizontal > .mm-panel {
-  -webkit-transition: none 0.25s ease;
-  -moz-transition: none 0.25s ease;
-  -ms-transition: none 0.25s ease;
-  -o-transition: none 0.25s ease;
-  transition: none 0.25s ease;
+   perspective: 1200px;
+   transform-style: preserve-3d;
+  -webkit-transition: none 0.6s ease;
+  -moz-transition: none 0.6s ease;
+  -ms-transition: none 0.6s ease;
+  -o-transition: none 0.6s ease;
+  transition: none 0.6s ease;
   -webkit-transition-property: top, right, bottom, left, border, -webkit-transform;
   -moz-transition-property: top, right, bottom, left, border, -moz-transform;
   -ms-transition-property: top, right, bottom, left, border, -ms-transform;
   -o-transition-property: top, right, bottom, left, border, -o-transform;
   transition-property: top, right, bottom, left, border, transform; }
+
 html.mm-opened .mm-page,
 html.mm-opened #mm-blocker {
   left: 0%;
@@ -100,8 +103,7 @@ html.mm-blocking #mm-blocker {
     padding: 20px;
     position: absolute;
     top: 0;
-    left: 100%;
-    z-index: 0; }
+    left: 100%;}
     .mm-menu > .mm-panel.mm-opened {
       left: 0%; }
     .mm-menu > .mm-panel.mm-subopened {

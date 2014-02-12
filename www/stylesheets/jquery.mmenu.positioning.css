@@ -146,6 +146,8 @@ html.mm-front.mm-opened .mm-page {
 
 .mm-menu.mm-front,
 .mm-menu.mm-next {
+   perspective: 0px;
+   transform-style: preserve-3d;
   -webkit-transition: none 0.4s ease;
   -moz-transition: none 0.4s ease;
   -ms-transition: none 0.4s ease;

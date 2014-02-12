@@ -9,12 +9,14 @@
 		<link rel='stylesheet' href='stylesheets/style.css' />
     <link type="text/css" rel="stylesheet" href="stylesheets/jquery.mmenu.css" />
     <link type="text/css" rel="stylesheet" href="stylesheets/jquery.mmenu.positioning.css" />
+    <link type="text/css" rel="stylesheet" href="stylesheets/animation.css" />
 
     <script type="text/javascript" src="javascripts/jquery.js"></script>
     <script type="text/javascript" src="javascripts/bootstrap.min.js"></script>
     <script type="text/javascript" src="javascripts/jquery.mmenu.min.js"></script>
 		<script type="text/javascript" src="javascripts/MapHandler.js"></script>
     <script type="text/javascript" src="javascripts/Route.js"></script>
+    <script type="text/javascript" src="javascripts/transition.js"></script>
 		<script type="text/javascript" src="javascripts/script.js"></script>
     <script type="text/javascript" src="javascripts/localstorage.js"></script>
 	</head>
@@ -46,7 +48,7 @@
           <a href="#" class="btn btn-info" id="change_live_url">Change LIVE_URL</a>
         </div>
         <div id="loading">
-          <img src="images/loading.gif" />
+          <img src="img/loading.gif" style="background: transparent;"/>
           <div id="yellow-box" style="position: fixed; right: 0; width:10px;height: 10px;background: lightgray;"></div>
         </div>
 
@@ -62,6 +64,74 @@
           <li><a href="/options" data-page='options'class="btn btn-primary nav-custom-text" id="status_1" onclick="logout()"><span class="menu-icon glyphicon glyphicon-user"></span>Login</a></li>
         </ul>
       </nav>
-    </div>  
+
+      <div id="userguide">
+          <div class="pt-wrapper">
+              <div id="ug-control">
+                <button class="pt-trigger btn" style="right: 10px;" data-animation="1" data-goto="-1" >NEXT</button>
+                <button class="pt-trigger btn" style="left: 10px;" data-animation="2" data-goto="-2" >PREV</button>
+              </div>
+              <div class="pt-page pt-page-1">
+                <img src="img/ug1.png" class="img-responsive"><br/>
+                <span class="header">USER GUIDE</span><br/>
+                <span class="subheader">Learn the Basics</span><br/>
+                <button class="pt-trigger startUG" data-animation="1" data-goto="-1">START</button>
+                <span style="cursor:default;background:#AD3333;position:absolute;text-align:right !important; height: 10px; width:10px; bottom:0; right:0;" onclick="hideUserGuide()"></span>
+              </div>
+              <div class="pt-page pt-page-2">
+                <span class="header">NAVIGATE</span><br/>
+                <span class="subheader">moving around the app</span><br/>
+                <img src="img/ug2.png" class="img-responsive"><br/>
+                <img src="img/ug3.png" class="img-responsive">
+              </div>
+              <div class="pt-page pt-page-3">
+                <span class="header">MAP TOOLS</span><br/>
+                <span class="subheader">explore the map and help the community</span><br/>
+                <img src="img/ug4.png" class="img-responsive"><br/>
+                <img src="img/ug5.png" class="img-responsive">
+                <img src="img/ug6.png" class="img-responsive"><br/><br/>
+                <img src="img/ug7.png" class="img-responsive">
+              </div>
+              <div class="pt-page pt-page-4">
+                <span class="header">TRAFFIC INTENSITY</span><br/>
+                <span class="subheader">realtime traffic at your hands.</span><br/>
+                <div style="position: relative; top:10px !important;">
+                  <div style="margin-bottom:15px;"><img src="img/ug8.png" class="img-responsive">
+                  <img src="img/ug9.png" class="img-responsive"></div>
+                  <img src="img/ug10.png" class="img-responsive">
+                  <img src="img/ug11.png" class="img-responsive"><br/>
+                  <div id="ss"><img src="img/ug13.png" class="img-responsive"></div>
+                </div>
+              </div>
+              <div class="pt-page pt-page-5">
+                <span class="header">REPORT INCIDENTS</span><br/>
+                <span class="subheader">help report incidents</span><br/>
+                <div id="sy"><img src="img/ug14.png" class="img-responsive"></div>
+              </div>
+              <div class="pt-page pt-page-6">
+                <span class="header">REPORT TYPES</span><br/>
+                <span class="subheader">familiarize different report categories</span><br/>
+                <img src="img/ug12.png" class="img-responsive">
+              </div>
+              <div class="pt-page pt-page-7">
+                <span class="header">SUGGEST ROUTES</span><br/>
+                <span class="subheader">suggest alternative routes</span>
+                <div id="sy"><img src="img/ug15.png" class="img-responsive"></div>
+              </div>
+              <div class="pt-page pt-page-8">
+                <span class="header">OFFICIAL / UNOFFICIAL</span><br/>
+                <span class="subheader">know what are verified and not.</span><br/>
+                <img src="img/ug16.png" class="img-responsive">
+              </div>
+              <div class="pt-page pt-page-9">
+                <span class="header">FINISHED</span><br/>
+                <span class="subheader">your ready to go!</span><br/>
+                <button class="pt-trigger restartUG" data-animation="2" data-goto="1">REVIEW</button>
+                <button class="closeUG" onclick="hideUserGuide('1');">CLOSE GUIDE</button>
+              </div>
+          </div>
+        </div>
+        <div class="ug-overlay"></div>
+    </div>
 	</body>
 </html>

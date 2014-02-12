@@ -21,6 +21,7 @@ var MapHandler = {
 	src: "",
 	EVENTS: {},
 	_cebuBounds: null,
+	_boundsShown: false,
 
 	/* This function must be called only once.. */
 	setup: function(options, callback) {
@@ -60,11 +61,11 @@ var MapHandler = {
 			mapTypeControl:false,
 			streetViewControl:false,
 			zoomControl:true,
+			disableDoubleClickZoom: true,
 			zoomControlOptions: {
 				style: google.maps.ZoomControlStyle.SMALL,
 				position: google.maps.ControlPosition.TOP_RIGHT
 			},
-
 			mapTypeId: google.maps.MapTypeId.ROADMAP
 		}
 		MapHandler.MAP = new google.maps.Map($("#map-canvas")[0], mapOptions);
@@ -125,18 +126,21 @@ var MapHandler = {
 		controlDiv.index = 1;
 		controlDiv.style.padding = '5px';
 		var controlUI = document.createElement('div');
-		controlUI.style.backgroundColor = 'yellow';
-		controlUI.style.border='1px solid';
-		controlUI.style.cursor = 'pointer';
-		controlUI.style.textAlign = 'center';
+		controlUI.style.backgroundColor = '#27AE60';
+		controlUI.style.display = "inline-block";
+		controlUI.style.minWidth = "10px";
+		controlUI.style.padding = "3px 7px";
+		controlUI.style.fontSize = "14px";
+		controlUI.style.fontWeight = "bold";
+		controlUI.style.lineHeight = "1.5";
+		controlUI.style.color = "#fff";
+		controlUI.style.textAlign = "center";
+		controlUI.style.whiteSpace = "nowrap";
+		controlUI.style.verticalAlign = "baseline";
+		controlUI.style.borderRadius= '10px';
+		controlUI.innerHTML = text;
 		controlDiv.appendChild(controlUI);
-		var controlText = document.createElement('div');
-		controlText.style.fontFamily='Arial,sans-serif';
-		controlText.style.fontSize='12px';
-		controlText.style.paddingLeft = '4px';
-		controlText.style.paddingRight = '4px';
-		controlText.innerHTML = text;
-		controlUI.appendChild(controlText);
+		
 
 		if(typeof(callback) != 'undefined'){
 			google.maps.event.addDomListener(controlUI, 'click', function() {
@@ -176,11 +180,13 @@ var MapHandler = {
 
 		MapHandler._cebuBounds.setMap(MapHandler.MAP);
 		BOUNDS_VISIBILITY = true;
+		MapHandler._boundsShown = true; //same as BOUNDS_VISIBILITY
 	},
 	
 	hideBounds: function(){
 		MapHandler._cebuBounds.setMap(null);
 		BOUNDS_VISIBILITY = false;
+		MapHandler._boundsShown = false;
 	}
 
 };

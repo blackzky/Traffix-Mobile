@@ -7,14 +7,14 @@ $(function(){
         route.nodes = unescape($("#route-nodes").val());
         route.is_Official = $("#route-is_Official").val();
 
-        console.log($("#route-start").val());
-
         $("#page-container").on("click", ".roback", function(){
         	viewPage("routes");
 			$(".mapnav").show();
         });
 
-        $(".msgbox").html("<p style=\"margin: 0 !important; \"> " + route.start + " - " + route.end + "</p>");
+        MapHandler.addUIControl((route.is_Official == 1 ? "Official": "Unofficial") + " Route", google.maps.ControlPosition.TOP_LEFT);
+        var msg = "<p style=\"margin: 0 !important; \"> " + route.start + " - " + route.end + "</p>";
+        $(".msgbox").html(msg);
 
 		//load route
 		Route.init(MapHandler.MAP, false);
