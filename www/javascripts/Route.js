@@ -1,7 +1,7 @@
 var Route = {
     MARKERS: [],
     SEGMENTS: [],
-    ALPHAS: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+    ALPHAS: 'abcdefghijklmnopqrstuvwxyz'.split(''),
     ALPHA_IDX: 0,
     MAP: null, 
     SERVICE: null,
@@ -246,7 +246,7 @@ var Route = {
         for(var i in routes) {
             content += "<div id='route-item-" + routes[i].id + "' class='" + (routes[i].is_Official == 1 ? 'official' : 'unofficial') + "-routes list-group-item route-item' \
             style='overflow: auto;' > \
-            <a href='#' class='" + _link_class + "' data-id='" + routes[i].id + "'>" + routes[i].title;
+            <a href='#' class='" + _link_class + "' data-id='" + routes[i].id + "'>" + htmlEntities(routes[i].title);
 
             content += "<span style='float:right;'" + (routes[i].is_Official == 1 ? "class='badge verified'>Official": "class='badge'>Unofficial")+ "</span>";
 
@@ -262,9 +262,9 @@ var Route = {
             content += "\
             <input type='hidden' value='" + routes[i].created_at + "' class='route-created_at' /> \
             <input type='hidden' value='" + routes[i].expire_at + "' class='route-expire_at' /> \
-            <input type='hidden' value='" + routes[i].title + "' id='route-"+routes[i].id+"-title' />\
-            <input type='hidden' value='" + routes[i].start + "' id='route-"+routes[i].id+"-start' />\
-            <input type='hidden' value='" + routes[i].end + "' id='route-"+routes[i].id+"-end' />\
+            <input type='hidden' value='" + htmlEntities(routes[i].title) + "' id='route-"+routes[i].id+"-title' />\
+            <input type='hidden' value='" + htmlEntities(routes[i].start) + "' id='route-"+routes[i].id+"-start' />\
+            <input type='hidden' value='" + htmlEntities(routes[i].end) + "' id='route-"+routes[i].id+"-end' />\
             <input type='hidden' value='" + routes[i].nodes + "' id='route-"+routes[i].id+"-nodes' /> \
             <input type='hidden' value='" + routes[i].is_Official + "' id='route-" + routes[i].id + "-is_Official' /></div>";
         }

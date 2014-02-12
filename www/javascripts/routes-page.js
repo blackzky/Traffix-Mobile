@@ -1,9 +1,9 @@
 $(function(){
 	MapHandler.setup({init_zoom: 13}, function(map){
 		var route = {};
-		route.title = $("#route-title").val();
-		route.start = unescape($("#route-start").val());
-		route.end = unescape($("#route-end").val());
+		route.title = htmlEntities($("#route-title").val());
+		route.start = ($("#route-start").val());
+		route.end = ($("#route-end").val());
         route.nodes = unescape($("#route-nodes").val());
         route.is_Official = $("#route-is_Official").val();
 
@@ -13,7 +13,7 @@ $(function(){
         });
 
         MapHandler.addUIControl((route.is_Official == 1 ? "Official": "Unofficial") + " Route", google.maps.ControlPosition.TOP_LEFT);
-        var msg = "<p style=\"margin: 0 !important; \"> " + route.start + " - " + route.end + "</p>";
+        var msg = "<p style=\"margin: 0 !important; \"> " + htmlEntities(route.start) + "SAMPLE - " + htmlEntities(route.end) + "</p>";
         $(".msgbox").html(msg);
 
 		//load route

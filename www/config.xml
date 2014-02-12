@@ -4,7 +4,7 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.traffic_advisory.cebu"
-        version   = "2.4.3">
+        version   = "2.7">
 
     <name>Cebu Traffic Advisory</name>
 
@@ -13,7 +13,7 @@
     </description>
 
     <author href="https://github.com/blackzky/Traffix-Mobile" email="gervelgiva@gmail.com">
-        Cebu Traffic Team
+        Cebu Traffic Advisory Team
     </author>
 
     <!--

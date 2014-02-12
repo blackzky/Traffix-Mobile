@@ -173,7 +173,7 @@ function getReports(){
             $('#downvoteReport').removeAttr("disabled");
             $('#openReport').trigger('open');
             modalTop('openReport');
-            $('.displayReportInfo').html('<div class="form-group"><label>Report Type:</label> <div class="form-control">' + $(id).data('type') + '</div> </div> <div class="form-group"> <label>Details:</label> <div class="form-control" style="overflow: auto; height: 100%; min-height:42px;">' + unescape($(id).data('details')) + '</div> </div>');
+            $('.displayReportInfo').html('<div class="form-group"><label>Report Type:</label> <div class="form-control">' + $(id).data('type') + '</div> </div> <div class="form-group"> <label>Details:</label> <div class="form-control" style="overflow: auto; height: 100%; min-height:42px;">' + htmlEntities($(id).data('details')) + '</div> </div>');
             $('.datestamp').html('<label><em>Created at:</em> '+ createDate + ' </label>');
             $('.statstamp').html(status);
             if(status == 'Verified'){
