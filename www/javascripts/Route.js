@@ -11,6 +11,7 @@ var Route = {
     SUGGEST_GUIDE : "Click on map to place markers, drag markers to change route",
     OUT_BOUNDS_GUIDE: "Cannot place/drag marker there. Place/drag the marker inside the RED area.",
     GUIDE_TIMER: null,
+    TIMERS: null,
 
     init: function(map, suggest_mode){
         Route.MARKERS = [];
@@ -36,7 +37,7 @@ var Route = {
 
     resetMarkers: function(){
         for (i in Route.MARKERS) {
-            Route.MARKERS[i].setMap(null);
+            if(Route.MARKERS[i] != null) Route.MARKERS[i].setMap(null);
         }
         Route.ALPHA_IDX = 0;
         Route.SEGMENTS = [];
@@ -253,7 +254,9 @@ var Route = {
             ca =  Route._createDate(routes[i].created_at);
             ea =  Route._createDate(routes[i].expire_at);
 
+            ROUTES[routes[i].id] = {"created_at": ca, "expire_at": ea};
             tea = Route.timeDifference(_now, ea);
+            
             exp_at = (tea == "") ? "Expires in less than a minute" : "Expires after " + tea;
             content += "<br /> \
                         <span class='route-ca' style='color: gray'>Created " + Route.timeDifference(_now, ca) + "</span>\
@@ -269,6 +272,35 @@ var Route = {
             <input type='hidden' value='" + routes[i].is_Official + "' id='route-" + routes[i].id + "-is_Official' /></div>";
         }
         return content;
+    },
+
+    startRealTimeTimers: function(){
+        Route.TIMERS = setTimeout(function(){
+            var _len = size(ROUTES);
+            var _now = new Date();
+            var _ca = "", _ea = "";
+
+            if(_len > 0 && localStorage.CUR_PAGE == "routes"){
+                for(var i in ROUTES){
+                    _ca = "Created " + Route.timeDifference(_now, ROUTES[i]["created_at"]);
+                    _ea = Route.timeDifference(_now, ROUTES[i]["expire_at"]);
+                    _ea = (_ea == "") ? "Expires in less than a second." : "Expires after " + _ea;
+
+                    if($("#route-item-" + i).length == 0){
+                        delete ROUTES[i];
+                    }else{
+                        $("#route-item-" + i + " span.route-ca").text(_ca);
+                        $("#route-item-" + i + " span.route-ea").text(_ea);
+                    }
+                }
+            }
+            
+            Route.startRealTimeTimers();
+        }, 950);
+    },
+
+    stopRealTimeTimers: function(){
+        clearTimeout(Route.TIMERS);
     },
 
     _createDate: function(date){
@@ -317,13 +349,17 @@ var Route = {
             minutesRound = Math.floor(minutes);
             seconds = (y2k - now) / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
             secondsRound = Math.round(seconds);
-            min = (minutesRound == 1) ? " minute" : " minutes.";
+
+
+            sec = (secondsRound == 1) ? " second" : " seconds";
+            min = (minutesRound == 1) ? " minute" : " minutes";
             hr = (hoursRound == 1) ? " hour" : " hours";
             dy = (daysRound == 1)  ? " day" : " days";
 
             return (daysRound == 0 ? "" : daysRound + dy) + 
             (hoursRound == 0 ? "" : ( (daysRound == 0 ? "" : ", ") + hoursRound + hr) ) + 
-            (minutesRound == 0 ? "" :( (hoursRound == 0 ? "" : ", ") + minutesRound + min) );
+            (minutesRound == 0 ? "" :( (hoursRound == 0 ? "" : ", ") + minutesRound + min)) +
+            (secondsRound == 0 ? "" :( (minutesRound == 0 ? "" : ", ") + secondsRound + sec));
         }
         
     }

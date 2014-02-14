@@ -8,6 +8,7 @@ REPORTS_CONFIG = {};
 ROUTES_CONFIG = {};
 REPORTS_CONFIG = {};
 TRAFFIC_CONFIG = {};
+ROUTES = {};
 
 BASE_URL = "http://162.243.230.27/";
 
@@ -79,6 +80,9 @@ function _webSocketReceivers(){
         SOCKET.on('route-removed', function (id) {
             if($('#listdiv').length > 0){
                 $("#route-item-" + id).remove();
+                if($('#route-item').length == 0){
+                    $("#no-routes-info").show();
+                }
             }
         });
 
@@ -155,7 +159,6 @@ function _webSocketReceivers(){
                 if(intensity.is_official == 0){
                     if(INTENSITIES_UNOFFICIAL[intensity.id].getIcon() != getIcon(intensity.lane_1, intensity.lane_2,intensity.id,intensity.is_vertical)){
                         INTENSITIES_UNOFFICIAL[intensity.id].setIcon( getIcon(intensity.lane_1, intensity.lane_2,intensity.id,intensity.is_vertical) );
-                        console.log("ID: " + intensity.id + " vertical: " + intensity.is_vertical);
                     }
                 }
             }

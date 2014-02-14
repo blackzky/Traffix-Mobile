@@ -13,7 +13,7 @@ $(function(){
         });
 
         MapHandler.addUIControl((route.is_Official == 1 ? "Official": "Unofficial") + " Route", google.maps.ControlPosition.TOP_LEFT);
-        var msg = "<p style=\"margin: 0 !important; \"> " + htmlEntities(route.start) + "SAMPLE - " + htmlEntities(route.end) + "</p>";
+        var msg = "<p style=\"margin: 0 !important; \"> " + htmlEntities(route.start) + " - " + htmlEntities(route.end) + "</p>";
         $(".msgbox").html(msg);
 
 		//load route

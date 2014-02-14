@@ -178,13 +178,13 @@ var MapHandler = {
 			fillOpacity: 0.1
 		});
 
-		MapHandler._cebuBounds.setMap(MapHandler.MAP);
+		if(MapHandler._cebuBounds != null) MapHandler._cebuBounds.setMap(MapHandler.MAP);
 		BOUNDS_VISIBILITY = true;
 		MapHandler._boundsShown = true; //same as BOUNDS_VISIBILITY
 	},
 	
 	hideBounds: function(){
-		MapHandler._cebuBounds.setMap(null);
+		if(MapHandler._cebuBounds != null) MapHandler._cebuBounds.setMap(null);
 		BOUNDS_VISIBILITY = false;
 		MapHandler._boundsShown = false;
 	}

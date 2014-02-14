@@ -4,7 +4,7 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.traffic_advisory.cebu"
-        version   = "2.7">
+        version   = "2.7.7">
 
     <name>Cebu Traffic Advisory</name>
 

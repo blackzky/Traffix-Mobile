@@ -5,7 +5,7 @@ var MODE = MODES.NORMAL;
 INTENSITIES_OFFICIAL = {};
 INTENSITIES_UNOFFICIAL = {};
 REPORT_MARKERS = {};
-MAX_TI_VOTE = 3;
+MAX_TI_VOTE = 1;
 REPORT_MARKERS_COUNT=0;
 ROAD_OFFICIAL = {};
 ROAD_UNOFFICIAL = {};
@@ -292,70 +292,18 @@ function seedTI(obj){
 
                     obj[_marker.id] = _marker;
                     google.maps.event.addListener(_marker, 'click', function(event) {
-                        TI_COUNT = parseInt( (localStorage.getItem('TI-'+ this.id) == null) ? 0 : localStorage.getItem('TI-'+ this.id) );
-                        if(TI_COUNT >= MAX_TI_VOTE){
-                            alert("CAN'T VOTE");
+                        if(IS_LOGGEDIN){
+                            _intensityEvent(this.id,this.lane);
                         }else{
-                            Traffic_intensity_id = this.id;
-                            if(MARKER_FILTER.toLowerCase() == OFFICIAL_TRAFFIC.toLowerCase() || MARKER_FILTER.toLowerCase() == "view all"){
-                                lastUpdate = "getLastUpdateOfficial";
-                                $(".msgTI").show();
-                            }else{
-                                $(".msgTI").hide(); 
-                                lastUpdate = "getLastUpdateUnofficial";
-                            }
-                            $.ajax({
-                                url: BASE_URL + lastUpdate,
-                                type: 'POST',
-                                data: {id: this.id},
-                                success: function(response){
-                                    $(".ti_icon").html("<img src = " +getIcon(response[0].lane_1, response[0].lane_2,response[0].id,response[0].is_vertical) +">");
-                                    var out = "";
-                                    if(response[0].last_update == "0000-00-00 00:00:00"){
-                                        out = "-- --:--";
-                                    }
-                                    else{
-                                        var date1 = new Date(response[1]);
-                                        var date2 = new Date(response[0].last_update);
-                                        var ddf = date1.getDate() - date2.getDate();
-                                        var hdf = date1.getHours() - date2.getHours();
-                                        var mdf = date1.getMinutes() - date2.getMinutes();
-                                        
-                                        if(mdf < 0){
-                                            mdf = mdf +  60;
-                                            hdf--;
-                                        }
-                                        if(hdf < 0){
-                                            hdf = hdf + 24;
-                                            ddf--;
-                                        }
-                                        if(ddf != 0) out += ddf+"D ";
-                                        if(hdf != 0) out += hdf+"H ";
-                                        if(mdf != 0) out += mdf + "M ";
-                                        if(out=="") out = " just now";
-                                        else out += " ago";
-                                    }
-                                    if(MARKER_FILTER.toLowerCase() == OFFICIAL_TRAFFIC.toLowerCase() || MARKER_FILTER.toLowerCase() == "view all"){
-                                        $(".lastUpdate").html(out);
-                                    }else{
-                                        $(".lastUpdate").html(out);
-                                    }
+                            if(this.lane == "NONE"){
+                                TI_COUNT = parseInt( (localStorage.getItem('TI-'+ this.id) == null) ? 0 : localStorage.getItem('TI-'+ this.id) );
+                                if(TI_COUNT >= MAX_TI_VOTE){
+                                    _showMessage("update traffic intensity");
+                                }else{
+                                    _intensityEvent(this.id,this.lane);
                                 }
-                                });
-                            if(IS_LOGGEDIN)
-                                $(".msgTI").hide();
-
-                            if(this.lane != "NONE"){
-                                $(".lane-options").show();
-                                $(".two-lanes").show();
-                                $(".lupdate").show();
-                                $('#TwoWay').trigger('open');
-                                modalTop('TwoWay');
                             }else{
-                                $(".one-lane").show();
-                                $(".lupdate").show();
-                                $('#OneWay').trigger('open');
-                                modalTop('TwoWay');
+                                _intensityEvent(this.id,this.lane);
                             }
                         }
                     });
@@ -379,6 +327,68 @@ function seedTI(obj){
     });
 }
 
+function _intensityEvent(id,lane){
+    Traffic_intensity_id = id;
+    if(MARKER_FILTER.toLowerCase() == OFFICIAL_TRAFFIC.toLowerCase() || MARKER_FILTER.toLowerCase() == "view all"){
+        lastUpdate = "getLastUpdateOfficial";
+        $(".msgTI").show();
+    }else{
+        $(".msgTI").hide(); 
+        lastUpdate = "getLastUpdateUnofficial";
+    }
+    $.ajax({
+        url: BASE_URL + lastUpdate,
+        type: 'POST',
+        data: {id: id},
+        success: function(response){
+            $(".ti_icon").html("<img src = " +getIcon(response[0].lane_1, response[0].lane_2,response[0].id,response[0].is_vertical) +">");
+            var out = "";
+            if(response[0].last_update == "0000-00-00 00:00:00"){
+                out = "-- --:--";
+            }else{
+                var date1 = new Date(response[1]);
+                var date2 = new Date(response[0].last_update);
+                var ddf = date1.getDate() - date2.getDate();
+                var hdf = date1.getHours() - date2.getHours();
+                var mdf = date1.getMinutes() - date2.getMinutes();
+                
+                if(mdf < 0){
+                    mdf = mdf +  60;
+                    hdf--;
+                }
+                if(hdf < 0){
+                    hdf = hdf + 24;
+                    ddf--;
+                }
+                if(ddf != 0) out += ddf+"D ";
+                if(hdf != 0) out += hdf+"H ";
+                if(mdf != 0) out += mdf + "M ";
+                if(out=="") out = " just now";
+                else out += " ago";
+            }
+            if(MARKER_FILTER.toLowerCase() == OFFICIAL_TRAFFIC.toLowerCase() || MARKER_FILTER.toLowerCase() == "view all"){
+                $(".lastUpdate").html(out);
+            }else{
+                $(".lastUpdate").html(out);
+            }
+        }
+    });
+    if(IS_LOGGEDIN)
+        $(".msgTI").hide();
+
+    if(lane != "NONE"){
+        $(".lane-options").show();
+        $(".two-lanes").show();
+        $(".lupdate").show();
+        $('#TwoWay').trigger('open');
+        modalTop('TwoWay');
+    }else{
+        $(".one-lane").show();
+        $(".lupdate").show();
+        $('#OneWay').trigger('open');
+        modalTop('TwoWay');
+    }
+}
 function _saveRoute(){
     if(Route.MARKERS.length < 2){
         $("#alertDialog").html("Please plot a route.").removeClass().addClass('alert alert-danger');
@@ -485,7 +495,7 @@ function _addReportHandler(){
                         $('#existReportDetails').html('<div class="form-group"><label>Report Type:</label> <div class="form-control">' + $("#reports-"+reportAdjacent.id).data('type') + '</div> </div> <div class="form-group"> <label>Details:</label> <div class="form-control" style="overflow: auto; height: 100%; min-height:42px;">' + unescape($("#reports-"+reportAdjacent.id).data('details')) + '</div> </div>');
                         $('#oldReportDetails').val( unescape($("#reports-"+reportAdjacent.id).data('details')) );
                         $('#report_id').val( reportAdjacent.id );
-                        $('#newReportDetails').html( '<label>Add new details?:</label><div class="form-group"><div class="form-control">' + $('#reportDetails').val() + '</div></div>');
+                        $('#newReportDetails').html( '<label>Add new details?:</label><div class="form-group"><div class="form-control" style="height:100% !important; overflow: auto;">' + $('#reportDetails').val() + '</div></div>');
                         $('#temp').val( $('#reportDetails').val() );
                         $('#decision').val(1);
                     }else{
@@ -554,7 +564,7 @@ function _createReport(){
         }
     }
     else{
-        alert("Can't create anymore report.");
+        _showMessage("create report");
     }
 }
 
@@ -604,7 +614,7 @@ function _suggestRoutePopop(){
         $("#suggestRoute").trigger('open');
         modalTop('suggestRoute');
     }else{
-        alert("Can't create routes anymore.");
+        _showMessage("suggest routes");
     }
 }
 
@@ -630,4 +640,11 @@ function showPoi(){
           }
         ];
     MapHandler.MAP.setOptions({styles: withPoi});
+}
+
+function _showMessage(msg){
+    var display = "Can't "+msg+". Limit has been reached.";
+    $(".alertmsgbox").html("<p style=\"margin: 0 !important; \"> " + display + "</p>");
+    $(".alertmsgbox").show();
+    setTimeout(function(){  $(".alertmsgbox").hide("slow"); }, 3000);
 }
