@@ -253,14 +253,10 @@ var Route = {
 
             ca =  Route._createDate(routes[i].created_at);
             ea =  Route._createDate(routes[i].expire_at);
-
-            ROUTES[routes[i].id] = {"created_at": ca, "expire_at": ea};
-            tea = Route.timeDifference(_now, ea);
             
-            exp_at = (tea == "") ? "Expires in less than a minute" : "Expires after " + tea;
             content += "<br /> \
-                        <span class='route-ca' style='color: gray'>Created " + Route.timeDifference(_now, ca) + "</span>\
-                        <span class='route-ea' style='float:right; color: gray'>" + exp_at + "</span></a>";
+                        <span class='route-ca' style='color: gray'>Created at " + ca.toDateTime() + "</span>\
+                        <span class='route-ea' style='float:right; color: gray'>Expires at " + ea.toDateTime() + "</span></a>";
 
             content += "\
             <input type='hidden' value='" + routes[i].created_at + "' class='route-created_at' /> \
@@ -272,31 +268,6 @@ var Route = {
             <input type='hidden' value='" + routes[i].is_Official + "' id='route-" + routes[i].id + "-is_Official' /></div>";
         }
         return content;
-    },
-
-    startRealTimeTimers: function(){
-        Route.TIMERS = setTimeout(function(){
-            var _len = size(ROUTES);
-            var _now = new Date();
-            var _ca = "", _ea = "";
-
-            if(_len > 0 && localStorage.CUR_PAGE == "routes"){
-                for(var i in ROUTES){
-                    _ca = "Created " + Route.timeDifference(_now, ROUTES[i]["created_at"]);
-                    _ea = Route.timeDifference(_now, ROUTES[i]["expire_at"]);
-                    _ea = (_ea == "") ? "Expires in less than a second." : "Expires after " + _ea;
-
-                    if($("#route-item-" + i).length == 0){
-                        delete ROUTES[i];
-                    }else{
-                        $("#route-item-" + i + " span.route-ca").text(_ca);
-                        $("#route-item-" + i + " span.route-ea").text(_ea);
-                    }
-                }
-            }
-            
-            Route.startRealTimeTimers();
-        }, 950);
     },
 
     stopRealTimeTimers: function(){

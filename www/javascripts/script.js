@@ -355,3 +355,9 @@ function hideUserGuide(e){
 function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+
+var proto = Date.prototype;
+proto.toDateTime = function(){
+    return (this.getFullYear() + "-" + this.getMonth() + "-" + this.getDate() + " " + this.getHours() + ":" + this.getMinutes() + ":" + this.getSeconds());
+}
