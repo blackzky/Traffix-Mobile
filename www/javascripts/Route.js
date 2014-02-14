@@ -1,3 +1,8 @@
+var proto = Date.prototype;
+proto.toDateTime = function(){
+    return (this.getFullYear() + "-" + this.getMonth() + "-" + this.getDate() + " " + this.getHours() + ":" + this.getMinutes() + ":" + this.getSeconds());
+}
+
 var Route = {
     MARKERS: [],
     SEGMENTS: [],
@@ -255,8 +260,8 @@ var Route = {
             ea =  Route._createDate(routes[i].expire_at);
             
             content += "<br /> \
-                        <span class='route-ca' style='color: gray'>Created at " + ca.toDateTime() + "</span>\
-                        <span class='route-ea' style='float:right; color: gray'>Expires at " + ea.toDateTime() + "</span></a>";
+                        <span class='route-ca' style='color: gray'>Created at " + new Date(ca).toDateTime() + "</span>\
+                        <span class='route-ea' style='float:right; color: gray'>Expires at " + new Date(ea).toDateTime() + "</span></a>";
 
             content += "\
             <input type='hidden' value='" + routes[i].created_at + "' class='route-created_at' /> \

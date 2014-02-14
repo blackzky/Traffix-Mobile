@@ -13,6 +13,7 @@ ROUTES = {};
 BASE_URL = "http://162.243.230.27/";
 
 
+
 $(function() {
     $("nav#menu").mmenu({   position: "right",  zposition: "front"   });
     $("#traffix-nav").on("click", "#menu-bars", function(){ $("#loading").hide(); });
@@ -129,7 +130,7 @@ function _webSocketReceivers(){
         });
 
         SOCKET.on('report-removed', function (id) {
-            REPORT_MARKERS[id].setMap(null);
+            if(REPORT_MARKERS[id] != null) REPORT_MARKERS[id].setMap(null);
             delete REPORT_MARKERS[id];
             $("#reports-" + id).replaceWith("");
             REPORT_MARKERS_COUNT--;
@@ -356,8 +357,11 @@ function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+<<<<<<< HEAD
 
 var proto = Date.prototype;
 proto.toDateTime = function(){
     return (this.getFullYear() + "-" + this.getMonth() + "-" + this.getDate() + " " + this.getHours() + ":" + this.getMinutes() + ":" + this.getSeconds());
 }
+=======
+>>>>>>> e9c965489706248c3ceed6a1503954cbdfe8cfe2
