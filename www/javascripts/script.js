@@ -80,7 +80,7 @@ function _webSocketReceivers(){
         SOCKET.on('route-removed', function (id) {
             if($('#listdiv').length > 0){
                 $("#route-item-" + id).remove();
-                if($('#route-item').length == 0){
+                if($('.route-item').length == 0){
                     $("#no-routes-info").show();
                 }
             }
