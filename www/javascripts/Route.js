@@ -278,7 +278,7 @@ var Route = {
         try{
             var d =  new Date(date);
             if(d.getTime() === d.getTime()){
-                d.setMonth(d.getMonth() + 1);
+                d = d.setMonth(d.getMonth() + 1);
                 return d;
             }else{
                 throw(err);
