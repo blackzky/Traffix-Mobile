@@ -10,8 +10,7 @@ REPORTS_CONFIG = {};
 TRAFFIC_CONFIG = {};
 ROUTES = {};
 
-BASE_URL = "http://162.243.230.27/";
-
+BASE_URL = "http://10.10.33.64:3000/";
 
 
 $(function() {
@@ -357,11 +356,3 @@ function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-<<<<<<< HEAD
-
-var proto = Date.prototype;
-proto.toDateTime = function(){
-    return (this.getFullYear() + "-" + this.getMonth() + "-" + this.getDate() + " " + this.getHours() + ":" + this.getMinutes() + ":" + this.getSeconds());
-}
-=======
->>>>>>> e9c965489706248c3ceed6a1503954cbdfe8cfe2
