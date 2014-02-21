@@ -10,7 +10,7 @@ REPORTS_CONFIG = {};
 TRAFFIC_CONFIG = {};
 ROUTES = {};
 
-BASE_URL = "http://10.10.33.64:3000/";
+BASE_URL = "http://192.168.1.100:3000/";
 
 
 $(function() {
